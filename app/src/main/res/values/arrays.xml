@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="connected_ecg">
+        <item>Y - Yes</item>
+        <item>N - No</item>
+    </string-array>
+
+    <string-array name="accessibility_options">
+        <item>Large truck towing a trailer</item>
+        <item>Large mono-chassis truck</item>
+        <item>Mini-truck</item>
+        <item>Tricycle</item>
+        <item>Only by bike or less</item>
+    </string-array>
+
+    <string-array name="ecom_distance">
+        <item>1 to 10 km</item>
+        <item>11 to 20 km</item>
+        <item>21 to 50 km</item>
+        <item>More than 50 km</item>
+    </string-array>
+
+    <string-array name="geo_district">
+        <item>Dist 1</item>
+        <item>Dist 2</item>
+        <item>Dist 3</item>
+    </string-array>
+</resources>
