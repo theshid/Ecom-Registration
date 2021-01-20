@@ -23,7 +23,7 @@ public class TokenAuthenticator implements Authenticator {
     Session session;
     ApiService apiService;
     private static final String HEADER_AUTHORIZATION = "Authorization";
-    private static final int REFRESH_TOKEN_FAIL = 403;
+    private static final int REFRESH_TOKEN_FAIL = 401;
     @Inject
     public TokenAuthenticator(Context context,Session session,ApiService apiService) {
          this.context= context;

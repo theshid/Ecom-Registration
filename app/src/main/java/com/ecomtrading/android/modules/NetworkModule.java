@@ -1,6 +1,11 @@
 package com.ecomtrading.android.modules;
 
+import android.content.Context;
+
+import com.ecomtrading.android.TokenAuthenticator;
+import com.ecomtrading.android.TokenInterceptor;
 import com.ecomtrading.android.api.ApiService;
+import com.ecomtrading.android.utils.Session;
 
 import java.util.concurrent.TimeUnit;
 
@@ -9,6 +14,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
+import dagger.hilt.android.qualifiers.ApplicationContext;
 import dagger.hilt.components.SingletonComponent;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -22,9 +28,11 @@ public class NetworkModule {
 
     @Provides
     @Singleton
-     public OkHttpClient provideOkHttpClient(){
+     public OkHttpClient provideOkHttpClient(@ApplicationContext Context context, Session session,ApiService apiService){
         return new OkHttpClient.Builder()
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                .authenticator(new TokenAuthenticator(context,session,apiService))
+                .addInterceptor(new TokenInterceptor(session))
                 .connectTimeout(120, TimeUnit.SECONDS)
                 .readTimeout(120,TimeUnit.SECONDS)
                 .build();

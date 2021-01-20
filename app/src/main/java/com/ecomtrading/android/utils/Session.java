@@ -24,6 +24,16 @@ public class Session {
         editor.apply();
     }
 
+    public void saveExpiryTime(String expiretime, String expiryTime){
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("expiry",expiryTime);
+        editor.apply();
+    }
+
+    public String getExpiryTime(){
+        return preferences.getString("expiry",null);
+    }
+
     public String getUserToken(){
         return preferences.getString("user_token",null);
     }
