@@ -24,7 +24,7 @@ public class Session {
         editor.apply();
     }
 
-    public void saveExpiryTime(String expiretime, String expiryTime){
+    public void saveExpiryTime( String expiryTime){
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString("expiry",expiryTime);
         editor.apply();

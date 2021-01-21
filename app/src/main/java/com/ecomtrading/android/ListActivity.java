@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.ecomtrading.android.api.ApiClient;
+
 import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
@@ -70,7 +70,7 @@ listViewModel= new ListViewModel(getApplication());
             }
         });
 
-        btn_token.setOnClickListener(new View.OnClickListener() {
+       /* btn_token.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 apiService = ApiClient.getClient().create(ApiService.class);
@@ -93,7 +93,7 @@ listViewModel= new ListViewModel(getApplication());
                 });
 
             }
-        });
+        });*/
 
         listViewModel.getData().observe(this, new Observer<List<CommunityInformation>>() {
             @Override

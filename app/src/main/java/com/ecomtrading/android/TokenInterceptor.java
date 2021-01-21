@@ -1,7 +1,10 @@
 package com.ecomtrading.android;
 
 import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.utils.Session;
 
 import java.io.IOException;
@@ -13,13 +16,18 @@ import javax.inject.Inject;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class TokenInterceptor implements Interceptor {
     Session mPrefs;
+    ApiService apiService;
+    AccessToken accessToken;
 
     @Inject
-    public TokenInterceptor(Session mPrefs){
+    public TokenInterceptor(Session mPrefs, ApiService apiService){
         this.mPrefs = mPrefs;
+        this.apiService = apiService;
     }
 
     @Override
@@ -44,7 +52,7 @@ public class TokenInterceptor implements Interceptor {
             int expiresIn=Integer.parseInt(tokenResponse.expires);
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.SECOND,expiresIn);
-            mPrefs.saveExpiryTime("expiretime",String.valueOf(calendar.getTimeInMillis()));
+            mPrefs.saveExpiryTime(String.valueOf(calendar.getTimeInMillis()));
 
             String newaccessToken="new access token";
             newRequest=chain.request().newBuilder()
@@ -55,6 +63,27 @@ public class TokenInterceptor implements Interceptor {
     }
 
     private AccessToken refreshToken() {
+
+        Call<AccessToken> call = apiService.sendIdentification("Bearer","murali",
+                "welcome","password");
+
+        call.enqueue(new Callback<AccessToken>() {
+            @Override
+            public void onResponse(Call<AccessToken> call, retrofit2.Response<AccessToken> response) {
+
+                Log.d("List","value of response"+ response.body().token);
+
+                mPrefs.saveToken(response.body().token);
+                mPrefs.saveExpiryTime(response.body().expires);
+                accessToken = response.body();
+            }
+
+            @Override
+            public void onFailure(Call<AccessToken> call, Throwable t) {
+                Log.d("List","value of response"+"failed" +t.getMessage());
+            }
+        });
+        return accessToken;
     }
 
 

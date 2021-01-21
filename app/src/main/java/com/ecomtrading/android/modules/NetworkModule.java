@@ -32,7 +32,7 @@ public class NetworkModule {
         return new OkHttpClient.Builder()
                 .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .authenticator(new TokenAuthenticator(context,session,apiService))
-                .addInterceptor(new TokenInterceptor(session))
+                .addInterceptor(new TokenInterceptor(session,apiService))
                 .connectTimeout(120, TimeUnit.SECONDS)
                 .readTimeout(120,TimeUnit.SECONDS)
                 .build();

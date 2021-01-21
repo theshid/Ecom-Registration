@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">EcomTest</string>
+    <string name="take_photo">Choose Photo</string>
+    <string name="label_community_name">Community Name</string>
+    <string name="label_geographical">Geographical District</string>
+    <string name="label_accessibility">Accessibility</string>
+    <string name="label_distance_ecom">Distance to Ecom</string>
+    <string name="label_license_date">License Date</string>
+    <string name="label_connected_ecg">Connected to ECG</string>
+    <string name="label_longitude">Longitude</string>
+    <string name="label_latitude">Latitude</string>
+    <string name="button_submit_form">Submit</string>
+    <string name="location_button">Get Location</string>
 </resources>
