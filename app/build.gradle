@@ -75,6 +75,13 @@ dependencies {
 
     implementation "com.mobsandgeeks:android-saripaar:2.0.3"
 
+    //Location
+    implementation 'io.nlopez.smartlocation:library:3.3.3'
+
+    //Permission
+    implementation "org.permissionsdispatcher:permissionsdispatcher:4.8.0"
+    annotationProcessor "org.permissionsdispatcher:permissionsdispatcher-processor:4.8.0"
+
 
 
 }

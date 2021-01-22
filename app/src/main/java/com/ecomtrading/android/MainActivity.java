@@ -5,11 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Base64;
@@ -37,16 +39,21 @@ import java.util.Date;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
+import io.nlopez.smartlocation.SmartLocation;
 import okhttp3.ResponseBody;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@RuntimePermissions
 public class MainActivity extends AppCompatActivity {
 
 
     AppCompatEditText dateLicense;
-    AppCompatButton btn_save;
+    AppCompatButton btn_save, btn_location;
     int RESULT_LOAD_IMG = 007;
     byte[] dataImg;
     String dataImgInBase64;
@@ -57,22 +64,40 @@ public class MainActivity extends AppCompatActivity {
     Double latitude_text, longitude_text;
     Session session;
     CircleImageView circleImageView;
-    AppCompatEditText community_name, geoDistrict,accessibility,distance,connectedToEcg,latitude, longitude;
+    Double lat, lgt;
+    AppCompatEditText community_name, geoDistrict, accessibility, distance, connectedToEcg, latitude, longitude;
     private DatePickerDialog.OnDateSetListener date;
     private Calendar calendar;
+
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 999;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+
         setUI();
+        prepareDatePicker();
+        setBtnClickListeners();
+        setEditTextClickListeners();
+        getUserLocation();
         session = new Session(this);
 
 
+    }
 
-
-
+    @NeedsPermission(Manifest.permission_group.LOCATION)
+    private void getUserLocation() {
+        SmartLocation.with(this).location()
+                .oneFix()
+                .start(new OnLocationUpdatedListener() {
+                    @Override
+                    public void onLocationUpdated(Location location) {
+                        lat = location.getLatitude();
+                        lgt = location.getLongitude();
+                    }
+                });
     }
 
     private void setUI() {
@@ -80,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         circleImageView = findViewById(R.id.community_photo);
         geoDistrict = findViewById(R.id.geographical_district);
         connectedToEcg = findViewById(R.id.connected_ecg);
-
+        btn_location = findViewById(R.id.location_button);
         dateLicense = findViewById(R.id.license_date);
         accessibility = findViewById(R.id.accessibility);
         distance = findViewById(R.id.distance_ecom);
@@ -90,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void setEditTextClickListeners(){
+    public void setEditTextClickListeners() {
         connectedToEcg.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,9 +143,16 @@ public class MainActivity extends AppCompatActivity {
                 openDistanceDialog(v);
             }
         });
+
+        dateLicense.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openDatePicker();
+            }
+        });
     }
 
-    private void setBtnClickListeners(){
+    private void setBtnClickListeners() {
         btn_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,10 +163,21 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         db.dao().insertCommunityInfo(information);
-                        Log.d("Main","executor");
+                        Log.d("Main", "executor");
 
                     }
                 });
+            }
+        });
+
+        btn_location.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (lat == null || lgt == null){
+                    getUserLocation();
+                }
+                latitude.setText(String.valueOf(lat));
+                longitude.setText(String.valueOf(lgt));
             }
         });
     }
@@ -145,7 +188,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle(R.string.label_connected_ecg)
                 .setItems(R.array.connected_ecg, (dialog, which) -> {
                     if (which == 0) {
-                       // community.setConnectedecg("Y");
+                        // community.setConnectedecg("Y");
                         connectedToEcg.setText("Y");
                     } else {
                         //community.setConnectedecg("N");
@@ -163,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
                 .setItems(R.array.connected_ecg, (dialog, which) -> {
-                    switch (which){
+                    switch (which) {
                         case 0:
                             geoDistrict.setText(districtArray[0]);
                             break;
@@ -187,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
                 .setItems(R.array.connected_ecg, (dialog, which) -> {
-                    switch (which){
+                    switch (which) {
                         case 0:
                             distance.setText(distanceArray[0]);
                             break;
@@ -214,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
                 .setItems(R.array.connected_ecg, (dialog, which) -> {
-                    switch (which){
+                    switch (which) {
                         case 0:
                             accessibility.setText(accessibilityArray[0]);
                             break;
@@ -254,7 +297,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateDateUI() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.UK);
-        .setText(sdf.format(calendar.getTime()));
+        dateLicense.setText(sdf.format(calendar.getTime()));
+    }
+
+    private void openDatePicker() {
+        new DatePickerDialog(this, date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
     private void saveToDb() {
@@ -272,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
                 distanceToECG, connedtedEcg, date_licence, latitude_text, longitude_text, dataImgInBase64
         ,user,createDate,updateBy,updateDate);*/
 
-       // ApiService service = ApiClient.getClient().create(ApiService.class);
+        // ApiService service = ApiClient.getClient().create(ApiService.class);
 
        /* Call<ResponseBody> call = service.sendInformation(communityName, district, accessibility_text, distanceToECG, connedtedEcg, date_licence,
                 latitude_text, longitude_text, dataImgInBase64,user,createDate,updateBy,updateDate);
@@ -289,22 +337,22 @@ public class MainActivity extends AppCompatActivity {
         });*/
 
 
-
     }
-    private String formatString(){
+
+    private String formatString() {
         Date today = new Date();
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a", Locale.US);
         String date = format.format(today);
         return date;
     }
 
-    private long setDateToLong(DatePicker date){
+    private long setDateToLong(DatePicker date) {
         String year = String.valueOf(date.getYear());
         String month = String.valueOf(date.getMonth());
         String day = String.valueOf(date.getDayOfMonth());
-        String jour = year+"-"+month+"-"+day;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd",Locale.US);
-        Date date_final ;
+        String jour = year + "-" + month + "-" + day;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        Date date_final;
         try {
             date_final = sdf.parse(jour);
             long startDate = date_final.getTime();
@@ -316,7 +364,6 @@ public class MainActivity extends AppCompatActivity {
         //long startDate = date_final.getTime();
         return 0;
     }
-
 
 
     private void intentPicker() {
