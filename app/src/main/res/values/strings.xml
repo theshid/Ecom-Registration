@@ -11,4 +11,7 @@
     <string name="label_latitude">Latitude</string>
     <string name="button_submit_form">Submit</string>
     <string name="location_button">Get Location</string>
+    <string name="enable_gps">Enable GPS</string>
+    <string name="enable_now">Enable Now</string>
+    <string name="required_for_this_app">Required for this app</string>
 </resources>

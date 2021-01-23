@@ -1,8 +1,11 @@
 package com.ecomtrading.android.api;
 
+import android.widget.SimpleAdapter;
+
 import com.ecomtrading.android.AccessToken;
 import com.ecomtrading.android.entity.CommunityInformation;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import okhttp3.RequestBody;
@@ -37,7 +40,7 @@ public interface ApiService {
             @Field("accessibility") int accessibility,
             @Field("distanceToECOM") int distance,
             @Field("connectedToEcg") String connected,
-            @Field("licenseDate") Long date_license,
+            @Field("licenseDate") String date_license,
             @Field("latitude") Double latitude,
             @Field("longitude") Double longitude,
             @Field("photo") String photo,

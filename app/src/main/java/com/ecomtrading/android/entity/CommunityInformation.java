@@ -5,16 +5,13 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
-import com.ecomtrading.android.converters.DateConverter;
 import com.ecomtrading.android.converters.TimestampConverter;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
-
 
 @Entity(tableName = "community_information")
-public class CommunityInformation implements Serializable {
+public class CommunityInformation  {
     @PrimaryKey(autoGenerate = true)
     @SerializedName("remoteID")
     int community_id;
@@ -35,8 +32,7 @@ public class CommunityInformation implements Serializable {
     String connected_to_ecg;
     @SerializedName("licenseDate")
     @Expose
-    @TypeConverters(DateConverter.class)
-    Long date_licence;
+    String date_licence;
     @SerializedName("latitude")
     @Expose
     Double latitude;
@@ -60,8 +56,14 @@ public class CommunityInformation implements Serializable {
     @Expose
     @TypeConverters(TimestampConverter.class)
     String updateDate;
+    @Expose(deserialize = false,serialize = false)
+    Boolean sent_server;
 
-    public CommunityInformation(int community_id, String community_name, int geographical_district, int accessibility, int distance, String connected_to_ecg, Long date_licence, Double latitude, Double longitude, String image, String createdBy, String createdDate, String updateBy, String updateDate) {
+    public CommunityInformation(int community_id, String community_name, int geographical_district,
+                                int accessibility, int distance, String connected_to_ecg,
+                                String date_licence, Double latitude, Double longitude, String image,
+                                String createdBy, String createdDate, String updateBy, String updateDate,
+                                Boolean sent_server) {
         this.community_id = community_id;
         this.community_name = community_name;
         this.geographical_district = geographical_district;
@@ -76,10 +78,15 @@ public class CommunityInformation implements Serializable {
         this.createdDate = createdDate;
         this.updateBy = updateBy;
         this.updateDate = updateDate;
+        this.sent_server = sent_server;
     }
 
     @Ignore
-    public CommunityInformation(String community_name, int geographical_district, int accessibility, int distance, String connected_to_ecg, Long date_licence, Double latitude, Double longitude, String image, String createdBy, String createdDate, String updateBy, String updateDate) {
+    public CommunityInformation(String community_name, int geographical_district,
+                                int accessibility, int distance, String connected_to_ecg,
+                                String date_licence, Double latitude, Double longitude, String image,
+                                String createdBy, String createdDate, String updateBy, String updateDate,
+                                Boolean sent_server) {
         this.community_name = community_name;
         this.geographical_district = geographical_district;
         this.accessibility = accessibility;
@@ -93,6 +100,15 @@ public class CommunityInformation implements Serializable {
         this.createdDate = createdDate;
         this.updateBy = updateBy;
         this.updateDate = updateDate;
+        this.sent_server = sent_server;
+    }
+
+    public Boolean getSent_server() {
+        return sent_server;
+    }
+
+    public void setSent_server(Boolean sent_server) {
+        this.sent_server = sent_server;
     }
 
     public int getCommunity_id() {
@@ -143,11 +159,11 @@ public class CommunityInformation implements Serializable {
         this.connected_to_ecg = connected_to_ecg;
     }
 
-    public Long getDate_licence() {
+    public String getDate_licence() {
         return date_licence;
     }
 
-    public void setDate_licence(Long date_licence) {
+    public void setDate_licence(String date_licence) {
         this.date_licence = date_licence;
     }
 
@@ -171,9 +187,6 @@ public class CommunityInformation implements Serializable {
         return image;
     }
 
-    public void setAge(String image) {
-        this.image = image;
-    }
 
     public void setImage(String image) {
         this.image = image;

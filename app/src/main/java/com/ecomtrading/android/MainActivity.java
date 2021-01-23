@@ -4,30 +4,39 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
 
-import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
 import com.ecomtrading.android.utils.AppExecutor;
 import com.ecomtrading.android.utils.Session;
-import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -41,17 +50,14 @@ import java.util.Locale;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
-import okhttp3.ResponseBody;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 @RuntimePermissions
 public class MainActivity extends AppCompatActivity {
 
 
+    @NotEmpty
     AppCompatEditText dateLicense;
     AppCompatButton btn_save, btn_location;
     int RESULT_LOAD_IMG = 007;
@@ -65,9 +71,12 @@ public class MainActivity extends AppCompatActivity {
     Session session;
     CircleImageView circleImageView;
     Double lat, lgt;
+    @NotEmpty
     AppCompatEditText community_name, geoDistrict, accessibility, distance, connectedToEcg, latitude, longitude;
     private DatePickerDialog.OnDateSetListener date;
     private Calendar calendar;
+    private FusedLocationProviderClient fusedLocationClient;
+
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 999;
 
@@ -77,18 +86,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
 
+
         setUI();
         prepareDatePicker();
         setBtnClickListeners();
         setEditTextClickListeners();
-        getUserLocation();
+        checkIfPermissionIsActive();
+
         session = new Session(this);
 
 
     }
 
-    @NeedsPermission(Manifest.permission_group.LOCATION)
-    private void getUserLocation() {
+    @SuppressLint("MissingPermission")
+    @NeedsPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+    public void getUserLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         SmartLocation.with(this).location()
                 .oneFix()
                 .start(new OnLocationUpdatedListener() {
@@ -98,6 +111,20 @@ public class MainActivity extends AppCompatActivity {
                         lgt = location.getLongitude();
                     }
                 });
+
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            lat = location.getLatitude();
+                            lgt = location.getLongitude();
+                        }
+                    }
+                });
+
     }
 
     private void setUI() {
@@ -133,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
         geoDistrict.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openGeoDistricDialog(v);
+                openGeoDistrictDialog(v);
             }
         });
 
@@ -156,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
         btn_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveToDb();
+                sendDataToViewModel();
 
                 AppExecutor executor = AppExecutor.getInstance();
                 executor.diskIO().execute(new Runnable() {
@@ -173,17 +200,15 @@ public class MainActivity extends AppCompatActivity {
         btn_location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (lat == null || lgt == null){
-                    getUserLocation();
-                }
                 latitude.setText(String.valueOf(lat));
                 longitude.setText(String.valueOf(lgt));
+
+
             }
         });
     }
 
     public void openConnectedToEcgDialog(View view) {
-        String[] ecgArray = getResources().getStringArray(R.array.connected_ecg);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
                 .setItems(R.array.connected_ecg, (dialog, which) -> {
@@ -201,11 +226,11 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public void openGeoDistricDialog(View view) {
+    public void openGeoDistrictDialog(View view) {
         String[] districtArray = getResources().getStringArray(R.array.geo_district);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
-                .setItems(R.array.connected_ecg, (dialog, which) -> {
+                .setItems(R.array.geo_district, (dialog, which) -> {
                     switch (which) {
                         case 0:
                             geoDistrict.setText(districtArray[0]);
@@ -229,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
         String[] distanceArray = getResources().getStringArray(R.array.ecom_distance);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
-                .setItems(R.array.connected_ecg, (dialog, which) -> {
+                .setItems(R.array.ecom_distance, (dialog, which) -> {
                     switch (which) {
                         case 0:
                             distance.setText(distanceArray[0]);
@@ -256,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
         String[] accessibilityArray = getResources().getStringArray(R.array.accessibility_options);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
-                .setItems(R.array.connected_ecg, (dialog, which) -> {
+                .setItems(R.array.accessibility_options, (dialog, which) -> {
                     switch (which) {
                         case 0:
                             accessibility.setText(accessibilityArray[0]);
@@ -305,8 +330,8 @@ public class MainActivity extends AppCompatActivity {
                 calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
-    private void saveToDb() {
-        db = MyDatabase.getInstance(this);
+    private void sendDataToViewModel() {
+
 
         //information = new CommunityInformation();
 
@@ -409,4 +434,68 @@ public class MainActivity extends AppCompatActivity {
         String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
         return encoded;
     }
+
+    private void checkIfPermissionIsActive() {
+        if (isAccessFineLocationGranted(this)) {
+            if (isLocationEnabled(this)) {
+                getUserLocation();
+            } else {
+                showGPSNotEnabledDialog(this);
+            }
+        } else {
+            requestAccessFineLocationPermission(this, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    /**
+     * Function to request permission from the user
+     */
+    public void requestAccessFineLocationPermission(AppCompatActivity activity, int requestId) {
+        ActivityCompat.requestPermissions(
+                activity,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                requestId
+        );
+    }
+
+    /**
+     * Function to check if the location permissions are granted or not
+     */
+    public Boolean isAccessFineLocationGranted(Context context) {
+        return ContextCompat
+                .checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Function to check if location of the device is enabled or not
+     */
+    public Boolean isLocationEnabled(Context context) {
+        LocationManager locationManager =
+                (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    /**
+     * Function to show the "enable GPS" Dialog box
+     */
+    public void showGPSNotEnabledDialog(Context context) {
+        new AlertDialog.Builder(context)
+                .setTitle(context.getString(R.string.enable_gps))
+                .setMessage(context.getString(R.string.required_for_this_app))
+                .setCancelable(false)
+                .setPositiveButton(context.getString(R.string.enable_now), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .show();
+
+
+    }
+
 }

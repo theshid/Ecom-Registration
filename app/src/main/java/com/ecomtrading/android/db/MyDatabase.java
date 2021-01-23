@@ -10,8 +10,8 @@ import androidx.room.TypeConverters;
 import com.ecomtrading.android.converters.DateConverter;
 import com.ecomtrading.android.entity.CommunityInformation;
 
-@Database(entities = CommunityInformation.class, version = 2, exportSchema = false)
-
+@Database(entities = CommunityInformation.class, version = 3, exportSchema = false)
+@TypeConverters(DateConverter.class)
 public abstract class MyDatabase extends RoomDatabase {
     public abstract Dao dao();
 
