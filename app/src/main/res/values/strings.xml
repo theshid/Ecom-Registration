@@ -14,4 +14,7 @@
     <string name="enable_gps">Enable GPS</string>
     <string name="enable_now">Enable Now</string>
     <string name="required_for_this_app">Required for this app</string>
+    <string name="action_gallery">Choose from Gallery</string>
+    <string name="action_camera">Take Photo</string>
+    <string name="image_loaded">Image has been loaded</string>
 </resources>

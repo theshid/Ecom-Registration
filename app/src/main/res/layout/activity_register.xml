@@ -21,6 +21,7 @@
         />
 
     <TextView
+        android:id="@+id/add_photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -382,6 +383,17 @@
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/latitude"
         app:layout_constraintTop_toBottomOf="@+id/textView9" />
+
+        <CheckBox
+            android:id="@+id/checkBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="50dp"
+            android:layout_marginLeft="50dp"
+            android:clickable="false"
+            android:text="Image not loaded"
+            app:layout_constraintStart_toEndOf="@+id/textView"
+            app:layout_constraintTop_toBottomOf="@+id/add_photo" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

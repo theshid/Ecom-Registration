@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -11,6 +12,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,30 +23,36 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Base64;
-import android.util.Log;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.DatePicker;
+import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
-import com.ecomtrading.android.utils.AppExecutor;
+import com.ecomtrading.android.utils.PermissionUtils;
 import com.ecomtrading.android.utils.Session;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.mobsandgeeks.saripaar.ValidationError;
+import com.mobsandgeeks.saripaar.Validator;
+import com.mobsandgeeks.saripaar.annotation.Checked;
 import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -53,16 +61,24 @@ import io.nlopez.smartlocation.SmartLocation;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
 
+import static com.ecomtrading.android.utils.ConversionUtils.bitmapToBase64;
+import static com.ecomtrading.android.utils.PermissionUtils.checkCameraPermissions;
+import static com.ecomtrading.android.utils.PermissionUtils.isLocationEnabled;
+import static com.ecomtrading.android.utils.PermissionUtils.requestAccessFineLocationPermission;
+import static com.ecomtrading.android.utils.PermissionUtils.showGPSNotEnabledDialog;
+
 @RuntimePermissions
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements Validator.ValidationListener {
 
 
+    private static final int REQUEST_CAMERA = 87;
+    private static final int REQUEST_GALLERY = 434;
     @NotEmpty
     AppCompatEditText dateLicense;
     AppCompatButton btn_save, btn_location;
     int RESULT_LOAD_IMG = 007;
     byte[] dataImg;
-    String dataImgInBase64;
+    String imgInString = "";
     CommunityInformation information;
     MyDatabase db;
     String communityName, connedtedEcg;
@@ -76,6 +92,10 @@ public class MainActivity extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener date;
     private Calendar calendar;
     private FusedLocationProviderClient fusedLocationClient;
+    Validator validator;
+    TextView textView_photo;
+    @Checked(message = "You need to upload an image")
+    private CheckBox imgLoadedCheckBox;
 
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 999;
@@ -86,8 +106,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
 
-
         setUI();
+        checkCameraPermissions(this);
+        validator = new Validator(this);
+        validator.setValidationListener(this);
         prepareDatePicker();
         setBtnClickListeners();
         setEditTextClickListeners();
@@ -139,6 +161,8 @@ public class MainActivity extends AppCompatActivity {
         latitude = findViewById(R.id.latitude);
         longitude = findViewById(R.id.longitude);
         btn_save = findViewById(R.id.submit_button);
+        textView_photo = findViewById(R.id.add_photo);
+        imgLoadedCheckBox = findViewById(R.id.checkBox);
 
     }
 
@@ -183,17 +207,7 @@ public class MainActivity extends AppCompatActivity {
         btn_save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendDataToViewModel();
-
-                AppExecutor executor = AppExecutor.getInstance();
-                executor.diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        db.dao().insertCommunityInfo(information);
-                        Log.d("Main", "executor");
-
-                    }
-                });
+                validator.validate();
             }
         });
 
@@ -204,6 +218,13 @@ public class MainActivity extends AppCompatActivity {
                 longitude.setText(String.valueOf(lgt));
 
 
+            }
+        });
+
+        textView_photo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPopupMenu(v);
             }
         });
     }
@@ -333,35 +354,6 @@ public class MainActivity extends AppCompatActivity {
     private void sendDataToViewModel() {
 
 
-        //information = new CommunityInformation();
-
-
-        String createDate = formatString();
-        String user = "murali";
-        String updateBy = "";
-        String updateDate = "";
-
-        /*information = new CommunityInformation(communityName, district, accessibility_text,
-                distanceToECG, connedtedEcg, date_licence, latitude_text, longitude_text, dataImgInBase64
-        ,user,createDate,updateBy,updateDate);*/
-
-        // ApiService service = ApiClient.getClient().create(ApiService.class);
-
-       /* Call<ResponseBody> call = service.sendInformation(communityName, district, accessibility_text, distanceToECG, connedtedEcg, date_licence,
-                latitude_text, longitude_text, dataImgInBase64,user,createDate,updateBy,updateDate);
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-            Log.d("Main","Success");
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("Main","failed to post");
-            }
-        });*/
-
-
     }
 
     private String formatString() {
@@ -371,30 +363,11 @@ public class MainActivity extends AppCompatActivity {
         return date;
     }
 
-    private long setDateToLong(DatePicker date) {
-        String year = String.valueOf(date.getYear());
-        String month = String.valueOf(date.getMonth());
-        String day = String.valueOf(date.getDayOfMonth());
-        String jour = year + "-" + month + "-" + day;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        Date date_final;
-        try {
-            date_final = sdf.parse(jour);
-            long startDate = date_final.getTime();
-            return startDate;
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
 
-        //long startDate = date_final.getTime();
-        return 0;
-    }
-
-
-    private void intentPicker() {
+    private void intentGalleryPhotoPicker() {
         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
         photoPickerIntent.setType("image/*");
-        startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
+        startActivityForResult(photoPickerIntent, REQUEST_GALLERY);
     }
 
     @Override
@@ -402,13 +375,15 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
 
-        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_GALLERY) {
             try {
                 final Uri imageUri = data.getData();
                 final InputStream imageStream = getContentResolver().openInputStream(imageUri);
                 final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                dataImg = convertImgToBit(selectedImage);
-                dataImgInBase64 = encodeToBase64(dataImg);
+                circleImageView.setImageBitmap(selectedImage);
+                imgInString = bitmapToBase64(selectedImage);
+                imgLoadedCheckBox.setChecked(true);
+                imgLoadedCheckBox.setText(R.string.image_loaded);
 
 
                 //image_view.setImageBitmap(selectedImage);
@@ -417,26 +392,25 @@ public class MainActivity extends AppCompatActivity {
 
             }
 
-        } else {
+        } else if ( requestCode == REQUEST_CAMERA && resultCode == RESULT_OK){
+            if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                circleImageView.setImageBitmap(imageBitmap);
+                imgInString = bitmapToBase64(imageBitmap);
+                imgLoadedCheckBox.setChecked(true);
+                imgLoadedCheckBox.setText("Image has been loaded");
+            }
+
+        }else{
             Toast.makeText(MainActivity.this, "You haven't picked Image", Toast.LENGTH_LONG).show();
         }
 
     }
 
-    private byte[] convertImgToBit(Bitmap bitmap) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-        return byteArray;
-    }
-
-    private String encodeToBase64(byte[] byteArray) {
-        String encoded = Base64.encodeToString(byteArray, Base64.DEFAULT);
-        return encoded;
-    }
 
     private void checkIfPermissionIsActive() {
-        if (isAccessFineLocationGranted(this)) {
+        if (PermissionUtils.isAccessFineLocationGranted(this)) {
             if (isLocationEnabled(this)) {
                 getUserLocation();
             } else {
@@ -447,55 +421,64 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Function to request permission from the user
-     */
-    public void requestAccessFineLocationPermission(AppCompatActivity activity, int requestId) {
-        ActivityCompat.requestPermissions(
-                activity,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                requestId
-        );
-    }
 
-    /**
-     * Function to check if the location permissions are granted or not
-     */
-    public Boolean isAccessFineLocationGranted(Context context) {
-        return ContextCompat
-                .checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED;
-    }
 
-    /**
-     * Function to check if location of the device is enabled or not
-     */
-    public Boolean isLocationEnabled(Context context) {
-        LocationManager locationManager =
-                (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-    }
-
-    /**
-     * Function to show the "enable GPS" Dialog box
-     */
-    public void showGPSNotEnabledDialog(Context context) {
-        new AlertDialog.Builder(context)
-                .setTitle(context.getString(R.string.enable_gps))
-                .setMessage(context.getString(R.string.required_for_this_app))
-                .setCancelable(false)
-                .setPositiveButton(context.getString(R.string.enable_now), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        context.startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                })
-                .show();
-
+    @Override
+    public void onValidationSucceeded() {
 
     }
 
+    @Override
+    public void onValidationFailed(List<ValidationError> errors) {
+        for (ValidationError error : errors) {
+            View view = error.getView();
+            String message = error.getCollatedErrorMessage(this);
+
+            // Display error messages ;)
+            if (view instanceof AppCompatEditText) {
+                ((AppCompatEditText) view).setError(message);
+            } else {
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    private void showPopupMenu(View view) {
+        // inflate menu
+
+        PopupMenu popup = new PopupMenu(view.getContext(), view);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu_popup, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupClickListener());
+        popup.show();
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            startActivityForResult(intent, REQUEST_CAMERA);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(getApplicationContext(), "Camera Unavailable", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    class PopupClickListener implements PopupMenu.OnMenuItemClickListener {
+
+        public PopupClickListener() {
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_camera:
+                    dispatchTakePictureIntent();
+                    return true;
+                case R.id.action_gallery:
+                    intentGalleryPhotoPicker();
+                    return true;
+                default:
+            }
+            return false;
+        }
+    }
 }
