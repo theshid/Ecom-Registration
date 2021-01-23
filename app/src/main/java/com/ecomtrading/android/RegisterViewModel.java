@@ -17,31 +17,34 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class RegisterViewModel extends ViewModel{
-ApiService apiService;
-MyDatabase database;
-Context context;
+public class RegisterViewModel extends ViewModel {
+    ApiService apiService;
+    MyDatabase database;
+    Context context;
+
+
 
     @Inject
-    public RegisterViewModel(ApiService apiService, MyDatabase database,Context context){
+    public RegisterViewModel(ApiService apiService, MyDatabase database, Context context) {
         this.apiService = apiService;
         this.database = database;
         this.context = context;
+
     }
 
-    public void saveCommunityToDb(CommunityInformation information){
+    public void saveCommunityToDb(CommunityInformation information) {
         Call<ResponseBody> call = apiService.sendInformation(information.getCommunity_name(),
                 information.getGeographical_district(), information.getAccessibility(),
                 information.getDistance(), information.getConnected_to_ecg(), information.getDate_licence(),
                 information.getLatitude(), information.getLongitude(), information.getImage(),
-                information.getCreatedBy(),information.getCreatedDate(),information.getUpdateBy(),
+                information.getCreatedBy(), information.getCreatedDate(), information.getUpdateBy(),
                 information.getUpdateDate());
         AppExecutor executor = AppExecutor.getInstance();
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d("Main","Success");
+                Log.d("Main", "Success");
                 information.setSent_server(false);
                 executor.diskIO().execute(new Runnable() {
                     @Override
@@ -55,7 +58,7 @@ Context context;
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.d("Main","failed to post");
+                Log.d("Main", "failed to post");
                 information.setSent_server(true);
                 executor.diskIO().execute(new Runnable() {
                     @Override

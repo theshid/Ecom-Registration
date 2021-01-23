@@ -29,6 +29,7 @@ import android.util.Base64;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,7 +68,7 @@ import static com.ecomtrading.android.utils.PermissionUtils.isLocationEnabled;
 import static com.ecomtrading.android.utils.PermissionUtils.requestAccessFineLocationPermission;
 import static com.ecomtrading.android.utils.PermissionUtils.showGPSNotEnabledDialog;
 
-@RuntimePermissions
+
 public class MainActivity extends AppCompatActivity implements Validator.ValidationListener {
 
 
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
 
 
         setUI();
+        hideSoftKeyboard();
         checkCameraPermissions(this);
         validator = new Validator(this);
         validator.setValidationListener(this);
@@ -121,10 +123,9 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     }
 
     @SuppressLint("MissingPermission")
-    @NeedsPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
     public void getUserLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        SmartLocation.with(this).location()
+       /* SmartLocation.with(this).location()
                 .oneFix()
                 .start(new OnLocationUpdatedListener() {
                     @Override
@@ -132,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
                         lat = location.getLatitude();
                         lgt = location.getLongitude();
                     }
-                });
+                });*/
 
 
         fusedLocationClient.getLastLocation()
@@ -164,6 +165,10 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
         textView_photo = findViewById(R.id.add_photo);
         imgLoadedCheckBox = findViewById(R.id.checkBox);
 
+    }
+
+    private void hideSoftKeyboard(){
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
     public void setEditTextClickListeners() {
@@ -248,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     }
 
     public void openGeoDistrictDialog(View view) {
-        String[] districtArray = getResources().getStringArray(R.array.geo_district);
+        String[] districtArray = getResources().getStringArray(R.array.accessibility_numbers);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
                 .setItems(R.array.geo_district, (dialog, which) -> {
@@ -272,23 +277,24 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     }
 
     public void openDistanceDialog(View view) {
-        String[] distanceArray = getResources().getStringArray(R.array.ecom_distance);
+        String[] distanceArray = getResources().getStringArray(R.array.accessibility_numbers);
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
                 .setItems(R.array.ecom_distance, (dialog, which) -> {
                     switch (which) {
                         case 0:
-                            distance.setText(distanceArray[0]);
+                            distance.setText(distanceArray[5]);
                             break;
                         case 1:
-                            distance.setText(distanceArray[1]);
+                            distance.setText(distanceArray[6]);
                             break;
 
                         case 2:
-                            distance.setText(distanceArray[2]);
+                            distance.setText(distanceArray[7]);
                             break;
                         case 3:
-                            distance.setText(distanceArray[3]);
+                            distance.setText(distanceArray[8]);
                             break;
 
                     }
@@ -300,27 +306,28 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
 
     public void openAccessibilityDialog(View view) {
         String[] accessibilityArray = getResources().getStringArray(R.array.accessibility_options);
+        String[] accessibilityArrayNumbers = getResources().getStringArray(R.array.accessibility_numbers);
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.label_connected_ecg)
                 .setItems(R.array.accessibility_options, (dialog, which) -> {
                     switch (which) {
                         case 0:
-                            accessibility.setText(accessibilityArray[0]);
+                            accessibility.setText(accessibilityArrayNumbers[0]);
                             break;
                         case 1:
-                            accessibility.setText(accessibilityArray[1]);
+                            accessibility.setText(accessibilityArrayNumbers[1]);
                             break;
 
                         case 2:
-                            accessibility.setText(accessibilityArray[2]);
+                            accessibility.setText(accessibilityArrayNumbers[2]);
                             break;
 
                         case 3:
-                            accessibility.setText(accessibilityArray[3]);
+                            accessibility.setText(accessibilityArrayNumbers[3]);
                             break;
 
                         case 4:
-                            accessibility.setText(accessibilityArray[4]);
+                            accessibility.setText(accessibilityArrayNumbers[4]);
                             break;
 
 
@@ -339,6 +346,13 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             updateDateUI();
         };
+    }
+
+    private String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.UK);//dd/MM/yyyy
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
     }
 
     private void updateDateUI() {
@@ -425,6 +439,8 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
 
     @Override
     public void onValidationSucceeded() {
+        String communityName = community_name.getText().toString();
+        String geo_district = geoDistrict.getText().toString();
 
     }
 
