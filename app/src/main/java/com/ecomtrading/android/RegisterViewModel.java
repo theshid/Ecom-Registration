@@ -3,6 +3,9 @@ package com.ecomtrading.android;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.hilt.Assisted;
+import androidx.hilt.lifecycle.ViewModelInject;
+import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
 import com.ecomtrading.android.api.ApiService;
@@ -20,16 +23,15 @@ import retrofit2.Response;
 public class RegisterViewModel extends ViewModel {
     ApiService apiService;
     MyDatabase database;
-    Context context;
+    private final SavedStateHandle savedStateHandle;
 
 
-
-    @Inject
-    public RegisterViewModel(ApiService apiService, MyDatabase database, Context context) {
+    @ViewModelInject
+    public RegisterViewModel(ApiService apiService, MyDatabase database,
+                             @Assisted SavedStateHandle savedStateHandle) {
         this.apiService = apiService;
         this.database = database;
-        this.context = context;
-
+        this.savedStateHandle = savedStateHandle;
     }
 
     public void saveCommunityToDb(CommunityInformation information) {

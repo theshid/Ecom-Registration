@@ -7,6 +7,7 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -56,6 +57,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
@@ -68,10 +70,11 @@ import static com.ecomtrading.android.utils.PermissionUtils.isLocationEnabled;
 import static com.ecomtrading.android.utils.PermissionUtils.requestAccessFineLocationPermission;
 import static com.ecomtrading.android.utils.PermissionUtils.showGPSNotEnabledDialog;
 
-
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity implements Validator.ValidationListener {
 
 
+    private RegisterViewModel viewModel;
     private static final int REQUEST_CAMERA = 87;
     private static final int REQUEST_GALLERY = 434;
     @NotEmpty
@@ -108,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
 
 
         setUI();
+        viewModel = new ViewModelProvider(this).get(RegisterViewModel.class);
         hideSoftKeyboard();
         checkCameraPermissions(this);
         validator = new Validator(this);
@@ -167,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
 
     }
 
-    private void hideSoftKeyboard(){
+    private void hideSoftKeyboard() {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
@@ -349,7 +353,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     }
 
     private String getCurrentTimeStamp() {
-        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",Locale.UK);//dd/MM/yyyy
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.UK);//dd/MM/yyyy
         Date now = new Date();
         String strDate = sdfDate.format(now);
         return strDate;
@@ -365,8 +369,8 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
                 calendar.get(Calendar.DAY_OF_MONTH)).show();
     }
 
-    private void sendDataToViewModel() {
-
+    private void sendDataToViewModel(CommunityInformation information) {
+        viewModel.saveCommunityToDb(information);
 
     }
 
@@ -406,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
 
             }
 
-        } else if ( requestCode == REQUEST_CAMERA && resultCode == RESULT_OK){
+        } else if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
             if (requestCode == REQUEST_CAMERA && resultCode == RESULT_OK) {
                 Bundle extras = data.getExtras();
                 Bitmap imageBitmap = (Bitmap) extras.get("data");
@@ -416,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
                 imgLoadedCheckBox.setText("Image has been loaded");
             }
 
-        }else{
+        } else {
             Toast.makeText(MainActivity.this, "You haven't picked Image", Toast.LENGTH_LONG).show();
         }
 
@@ -436,11 +440,26 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     }
 
 
-
     @Override
     public void onValidationSucceeded() {
         String communityName = community_name.getText().toString();
-        String geo_district = geoDistrict.getText().toString();
+        int geo_district = Integer.parseInt(geoDistrict.getText().toString());
+        int accessibility_str = Integer.parseInt(accessibility.getText().toString());
+        int distance_ecom = Integer.parseInt(distance.getText().toString());
+        String connect_ecg = connectedToEcg.getText().toString();
+        String date_license = dateLicense.getText().toString();
+        double lat = Double.parseDouble(latitude.getText().toString());
+        double longitu = Double.parseDouble(longitude.getText().toString());
+        String createdBy = "murali";
+        String createdDate = getCurrentTimeStamp();
+        String updateBy = "";
+        String updateDate = "";
+
+        CommunityInformation communityInformation = new CommunityInformation(communityName, geo_district,
+                accessibility_str, distance_ecom, connect_ecg, date_license, lat, longitu, imgInString, createdBy, createdDate,
+                updateBy, updateDate, false);
+
+        sendDataToViewModel(communityInformation);
 
     }
 
