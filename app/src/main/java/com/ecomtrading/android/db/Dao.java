@@ -15,6 +15,8 @@ public interface Dao {
     @Query("SELECT * FROM community_information")
     LiveData<List<CommunityInformation>> getAll();
 
+    @Query("SELECT * FROM community_information WHERE community_id = :id")
+    CommunityInformation getCommunity(int id);
 
     @Insert
     void insertCommunityInfo(CommunityInformation information);

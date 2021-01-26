@@ -58,6 +58,15 @@
                     android:drawableLeft="@drawable/ic_add_24" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/fragment_check"
+                android:clickable="false"
+                android:text="Image not loaded"
+                android:gravity="center"
+                android:layout_gravity="center"/>
+
             <TableLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

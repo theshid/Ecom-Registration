@@ -57,6 +57,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
 import dagger.hilt.android.AndroidEntryPoint;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -80,15 +82,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     @NotEmpty
     AppCompatEditText dateLicense;
     AppCompatButton btn_save, btn_location;
-    int RESULT_LOAD_IMG = 007;
-    byte[] dataImg;
     String imgInString = "";
-    CommunityInformation information;
-    MyDatabase db;
-    String communityName, connedtedEcg;
-    int district, accessibility_text, distanceToECG;
-    Double latitude_text, longitude_text;
-    Session session;
     CircleImageView circleImageView;
     Double lat, lgt;
     @NotEmpty
@@ -121,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
         setEditTextClickListeners();
         checkIfPermissionIsActive();
 
-        session = new Session(this);
+
 
 
     }
