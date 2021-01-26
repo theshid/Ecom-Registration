@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -12,37 +13,37 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.PopupMenu;
+import androidx.cardview.widget.CardView;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
 import com.ecomtrading.android.utils.AppExecutor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     Context context;
-    List<CommunityInformation> informationList;
-    MyDatabase db = MyDatabase.getInstance(context);
-    AppExecutor executor = AppExecutor.getInstance();
-    private ItemAction mItemOnClickAction;
+    private ArrayList<CommunityInformation> informationList = new ArrayList<>();
+    ListActivity listActivity;
+    FragmentManager fm;
+    MyDatabase database;
 
-    // Member variable to handle item clicks
-    //final private ItemClickListener mItemClickListener;
 
-    public interface ItemAction {
-        void onClick(int id);
-    }
 
-    public void setItemOnClickAction(ItemAction itemOnClickAction) {
-        mItemOnClickAction = itemOnClickAction;
+    public EcomAdapter(ListActivity listActivity, ArrayList<CommunityInformation> informationList,
+                       Context context, FragmentManager fm) {
 
-    }
-    public EcomAdapter(Context context, List<CommunityInformation> informationList) {
-
-        this.context = context;
+        this.listActivity = listActivity;
         this.informationList = informationList;
+        this.database = MyDatabase.getInstance(context);
+        this.fm = fm;
+
     }
 
     @NonNull
@@ -66,56 +67,63 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         holder.latitude.setText(communityInformation.getLatitude().toString());
         holder.longitude.setText(communityInformation.getLongitude().toString());
         holder.image.setText(communityInformation.getCommunity_name());
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+            }
+        });
 
 
 
     }
 
-    public interface ItemClickListener {
-        void onItemClickListener(int itemId);
+    private void showDialog(){
+
     }
+
+
 
     @Override
     public int getItemCount() {
 
-        return informationList.size();
+        return informationList != null ? informationList.size() :0;
+
     }
 
-
-    public void setClips(List<CommunityInformation> entries) {
-        informationList = entries;
+    public void updateList(ArrayList<CommunityInformation> newList) {
+        this.informationList = newList;
         notifyDataSetChanged();
+
     }
+
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView name, district, accessibility, distance, connected, date_license, latitude, longitude, image;
-        Button btn_delete, btn_edit, btn_update;
+        CardView cardView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            name = itemView.findViewById(R.id.row_name);
-            district = itemView.findViewById(R.id.row_district);
-            accessibility = itemView.findViewById(R.id.row_accesiblity);
-            distance = itemView.findViewById(R.id.row_distance);
-            connected = itemView.findViewById(R.id.row_connected_ecg);
-            date_license = itemView.findViewById(R.id.row_date_license);
-            latitude = itemView.findViewById(R.id.row_latitude);
-            longitude = itemView.findViewById(R.id.row_longitude);
-            image = itemView.findViewById(R.id.row_image);
+            name = itemView.findViewById(R.id.community_name);
+            district = itemView.findViewById(R.id.geographical_district);
+            accessibility = itemView.findViewById(R.id.accessibility);
+            distance = itemView.findViewById(R.id.distance_ecom);
+            connected = itemView.findViewById(R.id.connected_ecg);
+            date_license = itemView.findViewById(R.id.license_date);
+            latitude = itemView.findViewById(R.id.latitude);
+            longitude = itemView.findViewById(R.id.longitude);
+            image = itemView.findViewById(R.id.photo);
+            cardView = itemView.findViewById(R.id.ripple);
 
-            btn_delete = itemView.findViewById(R.id.btn_delete);
-            btn_edit = itemView.findViewById(R.id.btn_edit);
-            btn_update = itemView.findViewById(R.id.btn_update);
+
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     int elementId = getAdapterPosition();
-                    //mItemClickListener.onItemClickListener(elementId);
-                    mItemOnClickAction.onClick(informationList.get(getAdapterPosition()).getCommunity_id());
+
                     showDialog();
                 }
 
@@ -155,6 +163,27 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
             });
 
 
+        }
+    }
+
+    class PopupClickListener implements PopupMenu.OnMenuItemClickListener {
+
+        public PopupClickListener() {
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_edit:
+                    EditCommunityFragment.newInstance(id).show(fm, "Dialog Fragment");
+                    return true;
+                case R.id.action_delete:
+                    databaseHelper.deleteCommunity(id);
+                    activity.refreshList();
+                    return true;
+                default:
+            }
+            return false;
         }
     }
 

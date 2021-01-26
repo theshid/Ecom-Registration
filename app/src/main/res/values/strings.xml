@@ -17,4 +17,8 @@
     <string name="action_gallery">Choose from Gallery</string>
     <string name="action_camera">Take Photo</string>
     <string name="image_loaded">Image has been loaded</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

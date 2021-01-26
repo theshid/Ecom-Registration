@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/complete_form_ripple"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/photo_header"
+                android:layout_width="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_height="wrap_content">
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/community_photo"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:src="@drawable/avatar_placeholder"
+                    app:riv_corner_radius="50dp"
+                    android:scaleType="centerCrop"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="72dp"
+                    android:background="@drawable/background_text"
+                    android:gravity="center"
+                    android:text="@string/take_photo"
+                    android:drawableStart="@drawable/ic_add_24"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/ts_tiny"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.61"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:drawableLeft="@drawable/ic_add_24" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintTop_toBottomOf="@id/photo_header"
+                android:layout_marginBottom="20dp"
+                android:stretchColumns="*">
+
+                <TableRow android:layout_marginTop="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="1"
+                        android:text="@string/label_community_name"
+                        android:labelFor="@id/community_name"
+                        android:textColor="@color/md_grey_900"
+                        android:textSize="@dimen/ts_very_small"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow>
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/community_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/background_form"
+                        android:clickable="true"
+                        android:drawablePadding="5dp"
+                        android:focusable="false"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:minHeight="40dp"
+                        android:text="@={community.communityName}"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:textSize="@dimen/ts"
+                        app:validateEmpty="@{true}"
+                        tools:ignore="KeyboardInaccessibleWidget" />
+                </TableRow>
+
+                <TableRow android:layout_marginTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:labelFor="@+id/geographical_district"
+                        android:text="@string/label_geographical"
+                        android:textColor="@color/md_grey_900"
+                        android:textSize="@dimen/ts_very_small"
+                        android:textStyle="bold"
+                        android:layout_marginRight="5dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_column="1"
+                        android:layout_marginBottom="5dp"
+                        android:labelFor="@+id/accessibility"
+                        android:text="@string/label_accessibility"
+                        android:textColor="@color/md_grey_900"
+                        android:textSize="@dimen/ts_very_small"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow>
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/geographical_district"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/background_form"
+                        android:clickable="true"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:drawablePadding="5dp"
+                        android:focusable="false"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:minHeight="40dp"
+                        android:text="@={community.geoDistrict}"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:textSize="@dimen/ts"
+                        app:validateEmpty="@{true}"
+                        tools:ignore="KeyboardInaccessibleWidget"
+                        android:drawableRight="@drawable/ic_arrow_drop_down"
+                        android:layout_marginRight="5dp" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/accessibility"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="1"
+                        android:background="@drawable/background_form"
+                        android:clickable="true"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:drawablePadding="5dp"
+                        android:focusable="false"
+                        android:text="@={community.accessibility}"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:minHeight="40dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:textSize="@dimen/ts"
+                        app:validateEmpty="@{true}"
+                        tools:ignore="KeyboardInaccessibleWidget"
+                        android:drawableRight="@drawable/ic_arrow_drop_down" />
+                </TableRow>
+
+                <TableRow android:layout_marginTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:labelFor="@+id/distance_ecom"
+                        android:text="@string/label_distance_ecom"
+                        android:textColor="@color/md_grey_900"
+                        android:textSize="@dimen/ts_very_small"
+                        android:textStyle="bold"
+                        android:layout_marginRight="5dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_column="1"
+                        android:layout_marginBottom="5dp"
+                        android:labelFor="@+id/license_date"
+                        android:text="@string/label_license_date"
+                        android:textColor="@color/md_grey_900"
+                        android:textSize="@dimen/ts_very_small"
+                        android:textStyle="bold" />
+
+                </TableRow>
+
+                <TableRow>
+
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/distance_ecom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/background_form"
+                        android:clickable="true"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:drawablePadding="5dp"
+                        android:focusable="false"
+                        android:text="@={community.distancecom}"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:minHeight="40dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:textSize="@dimen/ts"
+                        app:validateEmpty="@{true}"
+                        tools:ignore="KeyboardInaccessibleWidget"
+                        android:drawableRight="@drawable/ic_arrow_drop_down"
+                        android:layout_marginRight="5dp" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/license_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="1"
+                        android:background="@drawable/background_form"
+                        android:clickable="true"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:text="@={community.dateoflicense}"
+                        android:drawablePadding="5dp"
+                        android:focusable="false"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:minHeight="40dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:textSize="@dimen/ts"
+                        app:validateEmpty="@{true}"
+                        tools:ignore="KeyboardInaccessibleWidget"
+                        android:drawableRight="@drawable/ic_arrow_drop_down" />
+
+                </TableRow>
+
+                <TableRow android:layout_marginTop="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="5dp"
+                        android:layout_weight="1"
+                        android:labelFor="@+id/connected_ecg"
+                        android:text="@string/label_connected_ecg"
+                        android:textColor="@color/md_grey_900"
+                        android:textSize="@dimen/ts_very_small"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow>
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/connected_ecg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/background_form"
+                        android:drawablePadding="5dp"
+                        android:clickable="true"
+                        android:importantForAutofill="no"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:inputType="text"
+                        android:minHeight="40dp"
+                        android:text="@={community.connectedecg}"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:textSize="@dimen/ts"
+                        app:validateEmpty="@{true}"
+                        tools:ignore="KeyboardInaccessibleWidget"
+                        android:drawableRight="@drawable/ic_arrow_drop_down" />
+                </TableRow>
+                <TableRow android:layout_marginTop="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:labelFor="@+id/distance_ecom"
+                        android:text="@string/label_longitude"
+                        android:textColor="@color/md_grey_900"
+                        android:textSize="@dimen/ts_very_small"
+                        android:textStyle="bold"
+                        android:layout_marginRight="5dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_column="1"
+                        android:layout_marginBottom="5dp"
+                        android:labelFor="@+id/license_date"
+                        android:text="@string/label_latitude"
+                        android:textColor="@color/md_grey_900"
+                        android:textSize="@dimen/ts_very_small"
+                        android:textStyle="bold" />
+
+                </TableRow>
+
+                <TableRow>
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/longitude"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="0"
+                        android:layout_marginEnd="5dp"
+                        android:background="@drawable/background_form"
+                        android:drawablePadding="5dp"
+                        android:text="@={community.longitude}"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:minHeight="40dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:textSize="@dimen/ts"
+                        app:validateEmpty="@{true}"
+                        tools:ignore="KeyboardInaccessibleWidget"
+                        android:layout_marginRight="5dp" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/latitude"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_column="1"
+                        android:background="@drawable/background_form"
+                        android:text="@={community.latitude}"
+                        android:drawablePadding="5dp"
+                        android:importantForAutofill="no"
+                        android:inputType="text"
+                        android:minHeight="40dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:textSize="@dimen/ts"
+                        app:validateEmpty="@{true}"
+                        tools:ignore="KeyboardInaccessibleWidget" />
+
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+    <com.balysv.materialripple.MaterialRippleLayout
+        android:id="@+id/complete_form_ripple"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="30dp"
+        android:layout_marginBottom="10dp"
+        app:mrl_rippleAlpha="0.1"
+        app:mrl_rippleColor="#000000"
+        app:mrl_rippleDimension="10dp"
+        app:mrl_rippleDuration="200"
+        app:mrl_rippleHover="true"
+        app:mrl_rippleOverlay="true"
+        app:mrl_rippleRoundedCorners="10dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/submit_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/background_selectable_button"
+            android:text="@string/button_submit_form"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="@dimen/ts_big"
+            android:textStyle="bold" />
+    </com.balysv.materialripple.MaterialRippleLayout>
+
+</LinearLayout>
