@@ -371,6 +371,37 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
+    <com.balysv.materialripple.MaterialRippleLayout
+        android:id="@+id/location_ripple"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="30dp"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        app:mrl_rippleAlpha="0.1"
+        app:mrl_rippleColor="#000000"
+        app:mrl_rippleDimension="10dp"
+        app:mrl_rippleDuration="200"
+        app:mrl_rippleHover="true"
+        app:mrl_rippleOverlay="true"
+        app:mrl_rippleRoundedCorners="10dp">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/location_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:padding="10dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/background_selectable_button"
+            android:text="@string/location_button"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="@dimen/ts_big"
+            android:textStyle="bold" />
+    </com.balysv.materialripple.MaterialRippleLayout>
 
     <com.balysv.materialripple.MaterialRippleLayout
         android:id="@+id/complete_form_ripple"

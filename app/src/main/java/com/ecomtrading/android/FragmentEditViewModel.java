@@ -24,6 +24,7 @@ public class FragmentEditViewModel extends ViewModel {
     }
 
     public CommunityInformation getCommunity(int id){
+
         return database.dao().getCommunity(id);
     }
 

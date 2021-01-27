@@ -1,6 +1,8 @@
 package com.ecomtrading.android.ui;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
+import android.location.Location;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.AppCompatButton;
@@ -11,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
@@ -18,7 +21,11 @@ import com.ecomtrading.android.FragmentEditViewModel;
 import com.ecomtrading.android.R;
 import com.ecomtrading.android.databinding.FragmentEditBinding;
 import com.ecomtrading.android.db.MyDatabase;
+import com.ecomtrading.android.entity.CommunityInformation;
+import com.ecomtrading.android.utils.ConversionUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.mobsandgeeks.saripaar.ValidationError;
 import com.mobsandgeeks.saripaar.Validator;
 import com.mobsandgeeks.saripaar.annotation.Checked;
@@ -62,6 +69,7 @@ public class EditFragment extends Fragment implements Validator.ValidationListen
     @Inject
     MyDatabase database;
     private FragmentEditViewModel editViewModel;
+    CommunityInformation information;
 
 
     public EditFragment() {
@@ -92,6 +100,7 @@ public class EditFragment extends Fragment implements Validator.ValidationListen
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         editViewModel = new ViewModelProvider(this).get(FragmentEditViewModel.class);
+        information = editViewModel.getCommunity(Integer.parseInt(localID));
         fragmentEditBinding = FragmentEditBinding.inflate(inflater,container,false);
         View view = fragmentEditBinding.getRoot();
         setUi(view);
@@ -113,6 +122,31 @@ public class EditFragment extends Fragment implements Validator.ValidationListen
         btn_save = view.findViewById(R.id.submit_button);
         textView_photo = view.findViewById(R.id.add_photo);
         imgLoadedCheckBox = view.findViewById(R.id.checkBox);
+
+        community_name.setText(information.getCommunity_name());
+        circleImageView.setImageBitmap(ConversionUtils.base64ToBitmap(information.getImage()));
+    }
+
+    @SuppressLint("MissingPermission")
+    public void getUserLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            lat = location.getLatitude();
+                            lgt = location.getLongitude();
+                        }
+                    }
+                });
+
+    }
+
+    private void hideSoftKeyboard() {
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
     }
 
     @Override
