@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 
 import com.ecomtrading.android.api.ApiService;
+import com.ecomtrading.android.databinding.ActivityListBinding;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
 import com.ecomtrading.android.utils.AppExecutor;
@@ -30,85 +31,33 @@ import retrofit2.Response;
 public class ListActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
-    EcomAdapter ecomAdapter;
-    AppExecutor executor;
-    List<CommunityInformation> informationList;
-    MyDatabase db;
-    Button btn_save_server, btn_token;
-    ApiService apiService;
+    EcomAdapter adapter;
+    ArrayList<CommunityInformation> informationList = new ArrayList<>();
+    private ActivityListBinding binding;
     Session session;
     ListViewModel listViewModel;
     public static String token;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list);
-        db = MyDatabase.getInstance(this);
-        session = new Session(this);
-        if (session.getUserToken() != null){
-            token = session.getUserToken();
-        }
-        informationList = new ArrayList<>();
-listViewModel= new ListViewModel(getApplication());
-
-        Log.d("List","size of list:"+informationList.size());
+        binding = ActivityListBinding.inflate(getLayoutInflater());
+        View view = binding.getRoot();
+        setContentView(view);
+        listViewModel = new ViewModelProvider(this).get(ListViewModel.class);
+        setupRecyclerViewAndAdapter();
 
 
-        btn_save_server = findViewById(R.id.btn_save_server);
-        btn_token = findViewById(R.id.btn_token);
-        ecomAdapter = new EcomAdapter(this,informationList);
-        recyclerView = findViewById(R.id.recycler_view);
+    }
 
+    private void setupRecyclerViewAndAdapter() {
+        adapter = new EcomAdapter(this, informationList, this, getSupportFragmentManager());
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerView.setAdapter(adapter);
+    }
 
-
-
-        btn_save_server.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-             Intent intent = new Intent(ListActivity.this,MainActivity.class);
-             startActivity(intent);
-            }
-        });
-
-       /* btn_token.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                apiService = ApiClient.getClient().create(ApiService.class);
-                Call<AccessToken> call = apiService.sendIdentification("Bearer","murali",
-                        "welcome","password");
-
-                call.enqueue(new Callback<AccessToken>() {
-                    @Override
-                    public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
-
-                            Log.d("List","value of response"+ response.body().token);
-                        Toast.makeText(ListActivity.this,"Token received",Toast.LENGTH_LONG).show();
-                        session.saveToken(response.body().token);
-                    }
-
-                    @Override
-                    public void onFailure(Call<AccessToken> call, Throwable t) {
-                        Log.d("List","value of response"+"failed" +t.getMessage());
-                    }
-                });
-
-            }
-        });*/
-
-        listViewModel.getData().observe(this, new Observer<List<CommunityInformation>>() {
-            @Override
-            public void onChanged(List<CommunityInformation> communityInformations) {
-                if (communityInformations != null){
-                    informationList = communityInformations;
-                }
-
-                recyclerView.setAdapter(ecomAdapter);
-                recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-
-            }
-        });
-
-
-
+    public void refreshList() {
+        adapter.updateList((ArrayList<CommunityInformation>) listViewModel.getData().getValue());
+       // hideEmptyCommunityList();
     }
 }

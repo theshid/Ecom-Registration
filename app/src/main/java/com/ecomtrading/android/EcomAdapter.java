@@ -5,10 +5,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
+import com.ecomtrading.android.ui.EditFragment;
 import com.ecomtrading.android.utils.AppExecutor;
 
 import java.util.ArrayList;
@@ -32,8 +35,10 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     private ArrayList<CommunityInformation> informationList = new ArrayList<>();
     ListActivity listActivity;
     FragmentManager fm;
+    private String id = "";
+    private int position;
     MyDatabase database;
-
+    AppExecutor appExecutor;
 
 
     public EcomAdapter(ListActivity listActivity, ArrayList<CommunityInformation> informationList,
@@ -58,6 +63,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CommunityInformation communityInformation = informationList.get(position);
 
+        position = holder.getAdapterPosition();
         holder.name.setText(communityInformation.getCommunity_name());
         holder.district.setText(communityInformation.getGeographical_district());
         holder.accessibility.setText(communityInformation.getAccessibility());
@@ -67,27 +73,31 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         holder.latitude.setText(communityInformation.getLatitude().toString());
         holder.longitude.setText(communityInformation.getLongitude().toString());
         holder.image.setText(communityInformation.getCommunity_name());
+        if (!communityInformation.getSent_server()) {
+            holder.img_status.setImageResource(R.drawable.ic_error);
+        } else {
+            holder.img_status.setImageResource(R.drawable.ic_check_circle);
+        }
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                showPopupMenu(v,communityInformation.getCommunity_id(),holder.getAdapterPosition() );
             }
         });
 
 
-
     }
 
-    private void showDialog(){
+    private void showDialog() {
 
     }
-
 
 
     @Override
     public int getItemCount() {
 
-        return informationList != null ? informationList.size() :0;
+        return informationList != null ? informationList.size() : 0;
 
     }
 
@@ -98,10 +108,10 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     }
 
 
-
     public class ViewHolder extends RecyclerView.ViewHolder {
         TextView name, district, accessibility, distance, connected, date_license, latitude, longitude, image;
         CardView cardView;
+        ImageView img_status;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -116,54 +126,21 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
             longitude = itemView.findViewById(R.id.longitude);
             image = itemView.findViewById(R.id.photo);
             cardView = itemView.findViewById(R.id.ripple);
+            img_status = itemView.findViewById(R.id.image_status);
 
-
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int elementId = getAdapterPosition();
-
-                    showDialog();
-                }
-
-                private void showDialog() {
-                    final AlertDialog.Builder dialog = new AlertDialog.Builder(context);
-                    dialog.setTitle("Menu");
-                    dialog.setMessage("Choose your option");
-
-
-                    LayoutInflater inflater = LayoutInflater.from(context);
-                    View option_layout = inflater.inflate(R.layout.dialog_layout, null);
-
-                    dialog.setView(option_layout);
-
-
-                    dialog.setPositiveButton("delete", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-
-                        }
-                    });
-
-
-                    dialog.setNegativeButton("Edit", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-
-                        }
-                    });
-
-
-                    dialog.show();
-
-                }
-            });
 
 
         }
+    }
+
+    private void showPopupMenu(View view, int localid, int position) {
+        // inflate menu
+        id = String.valueOf(localid);
+        PopupMenu popup = new PopupMenu(view.getContext(), view);
+        MenuInflater inflater = popup.getMenuInflater();
+        inflater.inflate(R.menu.menu_list, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupClickListener());
+        popup.show();
     }
 
     class PopupClickListener implements PopupMenu.OnMenuItemClickListener {
@@ -175,11 +152,19 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         public boolean onMenuItemClick(MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.action_edit:
-                    EditCommunityFragment.newInstance(id).show(fm, "Dialog Fragment");
+                    EditFragment.newInstance(id).show(fm, "Dialog Fragment");
                     return true;
                 case R.id.action_delete:
-                    databaseHelper.deleteCommunity(id);
-                    activity.refreshList();
+                    appExecutor = AppExecutor.getInstance();
+                    appExecutor.diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            CommunityInformation communityInformation = informationList.get(position);
+                            database.dao().deleteCommunityInfo(communityInformation);
+                        }
+                    });
+
+                    listActivity.refreshList();
                     return true;
                 default:
             }
