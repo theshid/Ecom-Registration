@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,28 +27,32 @@ import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
 import com.ecomtrading.android.ui.EditFragment;
 import com.ecomtrading.android.utils.AppExecutor;
+import com.ecomtrading.android.utils.ConversionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     Context context;
-    private ArrayList<CommunityInformation> informationList = new ArrayList<>();
+    private List<CommunityInformation> informationList = new ArrayList<>();
     ListActivity listActivity;
     FragmentManager fm;
-    private String id = "";
+    private int id ;
     private int position;
     MyDatabase database;
     AppExecutor appExecutor;
 
 
-    public EcomAdapter(ListActivity listActivity, ArrayList<CommunityInformation> informationList,
+    public EcomAdapter(ListActivity listActivity, List<CommunityInformation> informationList,
                        Context context, FragmentManager fm) {
 
         this.listActivity = listActivity;
         this.informationList = informationList;
         this.database = MyDatabase.getInstance(context);
         this.fm = fm;
+        this.context = context;
 
     }
 
@@ -63,16 +68,16 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CommunityInformation communityInformation = informationList.get(position);
 
-        position = holder.getAdapterPosition();
+
         holder.name.setText(communityInformation.getCommunity_name());
-        holder.district.setText(communityInformation.getGeographical_district());
-        holder.accessibility.setText(communityInformation.getAccessibility());
-        holder.distance.setText(communityInformation.getDistance());
-        holder.connected.setText(communityInformation.getConnected_to_ecg());
-        holder.date_license.setText(communityInformation.getDate_licence().toString());
-        holder.latitude.setText(communityInformation.getLatitude().toString());
-        holder.longitude.setText(communityInformation.getLongitude().toString());
-        holder.image.setText(communityInformation.getCommunity_name());
+        holder.district.setText(String.valueOf(communityInformation.getGeographical_district()));
+        holder.accessibility.setText(String.valueOf(communityInformation.getAccessibility()));
+        holder.distance.setText(String.valueOf(communityInformation.getDistance()));
+        holder.connected.setText(String.valueOf(communityInformation.getConnected_to_ecg()));
+        holder.date_license.setText(String.valueOf(communityInformation.getDate_licence()));
+        holder.latitude.setText(String.valueOf(communityInformation.getLatitude()));
+        holder.longitude.setText(String.valueOf(communityInformation.getLongitude()));
+        holder.image.setImageBitmap(ConversionUtils.base64ToBitmap(communityInformation.getImage()));
         if (!communityInformation.getSent_server()) {
             holder.img_status.setImageResource(R.drawable.ic_error);
         } else {
@@ -81,7 +86,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Log.d("Fragment","value of"+ position);
                 showPopupMenu(v,communityInformation.getCommunity_id(),holder.getAdapterPosition() );
             }
         });
@@ -109,8 +114,9 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, district, accessibility, distance, connected, date_license, latitude, longitude, image;
+        TextView name, district, accessibility, distance, connected, date_license, latitude, longitude;
         CardView cardView;
+        CircleImageView image;
         ImageView img_status;
 
         public ViewHolder(@NonNull View itemView) {
@@ -135,7 +141,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
 
     private void showPopupMenu(View view, int localid, int position) {
         // inflate menu
-        id = String.valueOf(localid);
+        id = localid;
         PopupMenu popup = new PopupMenu(view.getContext(), view);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_list, popup.getMenu());
@@ -152,6 +158,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         public boolean onMenuItemClick(MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.action_edit:
+                    Log.d("Fragment",String.valueOf(id));
                     EditFragment.newInstance(id).show(fm, "Dialog Fragment");
                     return true;
                 case R.id.action_delete:
@@ -159,6 +166,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
                     appExecutor.diskIO().execute(new Runnable() {
                         @Override
                         public void run() {
+                            Log.d("Fragment","value of"+ position);
                             CommunityInformation communityInformation = informationList.get(position);
                             database.dao().deleteCommunityInfo(communityInformation);
                         }

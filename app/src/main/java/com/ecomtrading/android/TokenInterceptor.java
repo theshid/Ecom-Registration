@@ -7,12 +7,15 @@ import android.widget.Toast;
 import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.utils.Session;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
 import javax.inject.Inject;
 
+import kotlin.contracts.ConditionalEffect;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -23,20 +26,25 @@ public class TokenInterceptor implements Interceptor {
     Session mPrefs;
     ApiService apiService;
     AccessToken accessToken;
+    Context context;
 
-    @Inject
-    public TokenInterceptor(Session mPrefs, ApiService apiService){
-        this.mPrefs = mPrefs;
-        this.apiService = apiService;
+
+    public TokenInterceptor(){
+        context = EcomApplication.getContext();
+        mPrefs = new Session(context);
+
     }
 
+    @NotNull
     @Override
     public Response intercept(Chain chain) throws IOException {
 
-        Request newRequest=chain.request();
+        Request newRequest=chain.request().newBuilder()
+                .header("Authorization", "Bearer "+mPrefs.getUserToken())
+                .build();
 
         //get expire time from shared preferences
-        long expireTime=Long.parseLong(mPrefs.getExpiryTime());
+        long expireTime=1799;
         Calendar c = Calendar.getInstance();
         Date nowDate=c.getTime();
         c.setTimeInMillis(expireTime);
@@ -54,7 +62,7 @@ public class TokenInterceptor implements Interceptor {
             calendar.add(Calendar.SECOND,expiresIn);
             mPrefs.saveExpiryTime(String.valueOf(calendar.getTimeInMillis()));
 
-            String newaccessToken="new access token";
+            String newaccessToken="Bearer "+ tokenResponse.token;
             newRequest=chain.request().newBuilder()
                     .header("Authorization", newaccessToken)
                     .build();
@@ -64,23 +72,26 @@ public class TokenInterceptor implements Interceptor {
 
     private AccessToken refreshToken() {
 
-        Call<AccessToken> call = apiService.sendIdentification("Bearer","murali",
+        Call<AccessToken> call = apiService.getToken("Bearer","murali",
                 "welcome","password");
 
         call.enqueue(new Callback<AccessToken>() {
             @Override
             public void onResponse(Call<AccessToken> call, retrofit2.Response<AccessToken> response) {
 
-                Log.d("List","value of response"+ response.body().token);
+                if (response.body() != null) {
+                    Log.d("Interceptor","value of response"+ response.body().token);
+                    mPrefs.saveToken(response.body().token);
+                    mPrefs.saveExpiryTime(response.body().expires);
+                    accessToken = response.body();
+                }
+                Log.d("Interceptor","value of response is null");
 
-                mPrefs.saveToken(response.body().token);
-                mPrefs.saveExpiryTime(response.body().expires);
-                accessToken = response.body();
             }
 
             @Override
-            public void onFailure(Call<AccessToken> call, Throwable t) {
-                Log.d("List","value of response"+"failed" +t.getMessage());
+            public void onFailure(@NotNull Call<AccessToken> call, Throwable t) {
+                Log.d("Interceptor","value of response"+"failed" +t.getMessage());
             }
         });
         return accessToken;

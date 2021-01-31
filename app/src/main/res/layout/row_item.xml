@@ -36,7 +36,6 @@
             android:contentDescription="photo"
             android:scaleType="centerCrop"
             android:src="@drawable/avatar_placeholder"
-            app:riv_corner_radius="5dp"
             android:layout_marginRight="@dimen/spacing_small" />
 
         <TableLayout

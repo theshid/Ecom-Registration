@@ -36,7 +36,6 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     android:src="@drawable/avatar_placeholder"
-                    app:riv_corner_radius="50dp"
                     android:scaleType="centerCrop"/>
 
                 <TextView
@@ -51,6 +50,7 @@
                     android:textColor="@color/white"
                     android:textSize="@dimen/ts_tiny"
                     android:textStyle="bold"
+                    android:id="@+id/fragment_text_photo"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.61"
                     app:layout_constraintStart_toStartOf="parent"
@@ -105,11 +105,9 @@
                         android:importantForAutofill="no"
                         android:inputType="text"
                         android:minHeight="40dp"
-                        android:text="@={community.communityName}"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:textSize="@dimen/ts"
-                        app:validateEmpty="@{true}"
                         tools:ignore="KeyboardInaccessibleWidget" />
                 </TableRow>
 
@@ -156,11 +154,9 @@
                         android:importantForAutofill="no"
                         android:inputType="text"
                         android:minHeight="40dp"
-                        android:text="@={community.geoDistrict}"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:textSize="@dimen/ts"
-                        app:validateEmpty="@{true}"
                         tools:ignore="KeyboardInaccessibleWidget"
                         android:drawableRight="@drawable/ic_arrow_drop_down"
                         android:layout_marginRight="5dp" />
@@ -175,14 +171,12 @@
                         android:drawableEnd="@drawable/ic_arrow_drop_down"
                         android:drawablePadding="5dp"
                         android:focusable="false"
-                        android:text="@={community.accessibility}"
                         android:importantForAutofill="no"
                         android:inputType="text"
                         android:minHeight="40dp"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:textSize="@dimen/ts"
-                        app:validateEmpty="@{true}"
                         tools:ignore="KeyboardInaccessibleWidget"
                         android:drawableRight="@drawable/ic_arrow_drop_down" />
                 </TableRow>
@@ -229,14 +223,12 @@
                         android:drawableEnd="@drawable/ic_arrow_drop_down"
                         android:drawablePadding="5dp"
                         android:focusable="false"
-                        android:text="@={community.distancecom}"
                         android:importantForAutofill="no"
                         android:inputType="text"
                         android:minHeight="40dp"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:textSize="@dimen/ts"
-                        app:validateEmpty="@{true}"
                         tools:ignore="KeyboardInaccessibleWidget"
                         android:drawableRight="@drawable/ic_arrow_drop_down"
                         android:layout_marginRight="5dp" />
@@ -249,7 +241,6 @@
                         android:background="@drawable/background_form"
                         android:clickable="true"
                         android:drawableEnd="@drawable/ic_arrow_drop_down"
-                        android:text="@={community.dateoflicense}"
                         android:drawablePadding="5dp"
                         android:focusable="false"
                         android:importantForAutofill="no"
@@ -258,7 +249,6 @@
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:textSize="@dimen/ts"
-                        app:validateEmpty="@{true}"
                         tools:ignore="KeyboardInaccessibleWidget"
                         android:drawableRight="@drawable/ic_arrow_drop_down" />
 
@@ -292,11 +282,9 @@
                         android:drawableEnd="@drawable/ic_arrow_drop_down"
                         android:inputType="text"
                         android:minHeight="40dp"
-                        android:text="@={community.connectedecg}"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:textSize="@dimen/ts"
-                        app:validateEmpty="@{true}"
                         tools:ignore="KeyboardInaccessibleWidget"
                         android:drawableRight="@drawable/ic_arrow_drop_down" />
                 </TableRow>
@@ -338,14 +326,12 @@
                         android:layout_marginEnd="5dp"
                         android:background="@drawable/background_form"
                         android:drawablePadding="5dp"
-                        android:text="@={community.longitude}"
                         android:importantForAutofill="no"
                         android:inputType="text"
                         android:minHeight="40dp"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:textSize="@dimen/ts"
-                        app:validateEmpty="@{true}"
                         tools:ignore="KeyboardInaccessibleWidget"
                         android:layout_marginRight="5dp" />
 
@@ -355,7 +341,6 @@
                         android:layout_height="wrap_content"
                         android:layout_column="1"
                         android:background="@drawable/background_form"
-                        android:text="@={community.latitude}"
                         android:drawablePadding="5dp"
                         android:importantForAutofill="no"
                         android:inputType="text"
@@ -363,7 +348,6 @@
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:textSize="@dimen/ts"
-                        app:validateEmpty="@{true}"
                         tools:ignore="KeyboardInaccessibleWidget" />
 
                 </TableRow>

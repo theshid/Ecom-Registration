@@ -17,9 +17,11 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -31,11 +33,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ecomtrading.android.FragmentEditViewModel;
+import com.ecomtrading.android.FragmentEditViewModelFactory;
 import com.ecomtrading.android.MainActivity;
 import com.ecomtrading.android.R;
+import com.ecomtrading.android.api.ApiClient;
+import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.databinding.FragmentEditBinding;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
+import com.ecomtrading.android.utils.AppExecutor;
 import com.ecomtrading.android.utils.ConversionUtils;
 import com.ecomtrading.android.utils.PermissionUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -70,11 +76,11 @@ import static com.ecomtrading.android.utils.PermissionUtils.showGPSNotEnabledDia
  * Use the {@link EditFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-@AndroidEntryPoint
-public class EditFragment extends DialogFragment implements Validator.ValidationListener{
+
+public class EditFragment extends DialogFragment implements Validator.ValidationListener {
 
     private static final String ARG_PARAM1 = "param1";
-    private String localID = "";
+    private int localID ;
     private String imageString = "";
     private DatePickerDialog.OnDateSetListener date;
     private Calendar calendar;
@@ -93,8 +99,8 @@ public class EditFragment extends DialogFragment implements Validator.Validation
     private CheckBox imgLoadedCheckBox;
     TextView textView_photo;
     String imgInString;
-    @Inject
     MyDatabase database;
+    ApiService apiService;
     private FragmentEditViewModel editViewModel;
     CommunityInformation information;
     Validator validator;
@@ -107,10 +113,10 @@ public class EditFragment extends DialogFragment implements Validator.Validation
 
 
     // TODO: Rename and change types and number of parameters
-    public static EditFragment newInstance(String param1) {
+    public static EditFragment newInstance(int param1) {
         EditFragment fragment = new EditFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
+        args.putInt(ARG_PARAM1, param1);
         fragment.setArguments(args);
 
         return fragment;
@@ -119,8 +125,20 @@ public class EditFragment extends DialogFragment implements Validator.Validation
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setStyle(DialogFragment.STYLE_NORMAL,R.style.yourStyle);
+        apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
+        database = MyDatabase.getInstance(getActivity());
+        AppExecutor.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                information = database.dao().getCommunity(1);
+            }
+        });
+        editViewModel = new ViewModelProvider(this, new FragmentEditViewModelFactory(
+                apiService, database)).get(FragmentEditViewModel.class);
         if (getArguments() != null) {
-            localID = getArguments().getString(ARG_PARAM1);
+            localID = getArguments().getInt(ARG_PARAM1);
+            Log.d("Fragment",String.valueOf(localID));
         }
     }
 
@@ -128,12 +146,16 @@ public class EditFragment extends DialogFragment implements Validator.Validation
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        editViewModel = new ViewModelProvider(this).get(FragmentEditViewModel.class);
+
+
+        fragmentEditBinding = FragmentEditBinding.inflate(inflater, container, false);
+        View view = fragmentEditBinding.getRoot();
         validator = new Validator(this);
         validator.setValidationListener(this);
-        information = editViewModel.getCommunity(Integer.parseInt(localID));
-        fragmentEditBinding = FragmentEditBinding.inflate(inflater,container,false);
-        View view = fragmentEditBinding.getRoot();
+        Log.d("Fragment",String.valueOf(localID));
+
+
+
         setUi(view);
         hideSoftKeyboard();
         prepareDatePicker();
@@ -142,7 +164,6 @@ public class EditFragment extends DialogFragment implements Validator.Validation
 
         return view;
     }
-
 
 
     private void setUi(View view) {
@@ -157,12 +178,12 @@ public class EditFragment extends DialogFragment implements Validator.Validation
         latitude = view.findViewById(R.id.latitude);
         longitude = view.findViewById(R.id.longitude);
         btn_save = view.findViewById(R.id.submit_button);
-        textView_photo = view.findViewById(R.id.add_photo);
-        imgLoadedCheckBox = view.findViewById(R.id.checkBox);
+        textView_photo = view.findViewById(R.id.fragment_text_photo);
+        imgLoadedCheckBox = view.findViewById(R.id.fragment_check);
 
-        community_name.setText(information.getCommunity_name());
+        /*community_name.setText(information.getCommunity_name());
         imageString = information.getImage();
-        if (!imageString.isEmpty()){
+        if (!imageString.isEmpty()) {
             imgLoadedCheckBox.setChecked(true);
             imgLoadedCheckBox.setText("Image Loaded");
         }
@@ -171,7 +192,7 @@ public class EditFragment extends DialogFragment implements Validator.Validation
         connectedToEcg.setText(information.getConnected_to_ecg());
         distance.setText(information.getDistance());
         latitude.setText(String.valueOf(information.getLatitude()));
-        longitude.setText(String.valueOf(information.getLongitude()));
+        longitude.setText(String.valueOf(information.getLongitude()));*/
     }
 
     private void setBtnClickListeners() {
@@ -300,7 +321,6 @@ public class EditFragment extends DialogFragment implements Validator.Validation
             Toast.makeText(getContext(), "You haven't picked Image", Toast.LENGTH_LONG).show();
         }
     }
-
 
 
     public void openConnectedToEcgDialog(View view) {

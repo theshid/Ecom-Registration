@@ -3,18 +3,18 @@ package com.ecomtrading.android.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.qualifiers.ActivityContext;
+
 public class Session {
     Context context;
     SharedPreferences preferences;
-
 
     public Session(Context context) {
         this.context = context;
         preferences = context.getSharedPreferences("file",Context.MODE_PRIVATE);
     }
-
-
-
 
     public static String USER_TOKEN = "token";
 

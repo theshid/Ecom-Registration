@@ -7,6 +7,7 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
@@ -36,6 +37,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.ecomtrading.android.api.ApiClient;
+import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
 import com.ecomtrading.android.utils.PermissionUtils;
@@ -72,7 +75,7 @@ import static com.ecomtrading.android.utils.PermissionUtils.isLocationEnabled;
 import static com.ecomtrading.android.utils.PermissionUtils.requestAccessFineLocationPermission;
 import static com.ecomtrading.android.utils.PermissionUtils.showGPSNotEnabledDialog;
 
-@AndroidEntryPoint
+
 public class MainActivity extends AppCompatActivity implements Validator.ValidationListener {
 
 
@@ -92,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     private FusedLocationProviderClient fusedLocationClient;
     Validator validator;
     TextView textView_photo;
+    MyDatabase database;
+    ApiService apiService;
     @Checked(message = "You need to upload an image")
     private CheckBox imgLoadedCheckBox;
 
@@ -105,7 +110,10 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
 
 
         setUI();
-        viewModel = new ViewModelProvider(this).get(RegisterViewModel.class);
+        apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
+        database = MyDatabase.getInstance(this);
+        viewModel = new ViewModelProvider(this, new RegisterViewModelFactory(
+                apiService,database)).get(RegisterViewModel.class);
         hideSoftKeyboard();
         checkCameraPermissions(this);
         validator = new Validator(this);
@@ -123,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     @SuppressLint("MissingPermission")
     public void getUserLocation() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-       /* SmartLocation.with(this).location()
+        /*SmartLocation.with(this).location()
                 .oneFix()
                 .start(new OnLocationUpdatedListener() {
                     @Override
@@ -217,8 +225,15 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
         btn_location.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                latitude.setText(String.valueOf(lat));
-                longitude.setText(String.valueOf(lgt));
+                if (lat== null){
+                    getUserLocation();
+                    latitude.setText(String.valueOf(lat));
+                    longitude.setText(String.valueOf(lgt));
+                }else{
+                    latitude.setText(String.valueOf(lat));
+                    longitude.setText(String.valueOf(lgt));
+                }
+
 
 
             }
@@ -365,7 +380,12 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
 
     private void sendDataToViewModel(CommunityInformation information) {
         viewModel.saveCommunityToDb(information);
+        goBackToListActivity();
+    }
 
+    private void goBackToListActivity(){
+        Intent intent = new Intent(this,ListActivity.class);
+        startActivity(intent);
     }
 
     private String formatString() {

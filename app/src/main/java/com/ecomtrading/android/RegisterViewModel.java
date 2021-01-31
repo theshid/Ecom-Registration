@@ -15,23 +15,23 @@ import com.ecomtrading.android.utils.AppExecutor;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.lifecycle.HiltViewModel;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+
 public class RegisterViewModel extends ViewModel {
     ApiService apiService;
     MyDatabase database;
-    private final SavedStateHandle savedStateHandle;
 
 
-    @ViewModelInject
-    public RegisterViewModel(ApiService apiService, MyDatabase database,
-                             @Assisted SavedStateHandle savedStateHandle) {
+
+
+    RegisterViewModel(ApiService apiService, MyDatabase database) {
         this.apiService = apiService;
         this.database = database;
-        this.savedStateHandle = savedStateHandle;
     }
 
     public void saveCommunityToDb(CommunityInformation information) {
@@ -47,10 +47,11 @@ public class RegisterViewModel extends ViewModel {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.d("Main", "Success");
-                information.setSent_server(false);
+
                 executor.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
+                        information.setSent_server(true);
                         database.dao().insertCommunityInfo(information);
                         Log.d("Main", "executor");
 
@@ -61,10 +62,11 @@ public class RegisterViewModel extends ViewModel {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.d("Main", "failed to post");
-                information.setSent_server(true);
+
                 executor.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
+                        information.setSent_server(false);
                         database.dao().insertCommunityInfo(information);
                         Log.d("Main", "executor");
 

@@ -2,6 +2,7 @@ package com.ecomtrading.android;
 
 import android.content.Context;
 
+import com.ecomtrading.android.api.ApiClient;
 import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.utils.Session;
 import com.google.gson.JsonObject;
@@ -24,11 +25,11 @@ public class TokenAuthenticator implements Authenticator {
     ApiService apiService;
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final int REFRESH_TOKEN_FAIL = 401;
-    @Inject
-    public TokenAuthenticator(Context context,Session session,ApiService apiService) {
-         this.context= context;
-         this.session = session;
-         this.apiService = apiService;
+
+    public TokenAuthenticator() {
+         context = EcomApplication.getContext();
+         session = new Session(context);
+         apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
     }
 
 
@@ -61,7 +62,7 @@ public class TokenAuthenticator implements Authenticator {
                 JsonObject refreshObject = new JsonObject();
                 refreshObject.addProperty("refreshToken", session.getUserToken());
 
-                retrofit2.Response<AccessToken> tokenResponse =  apiService.sendIdentification("Bearer","murali",
+                retrofit2.Response<AccessToken> tokenResponse =  apiService.getToken("Bearer","murali",
                         "welcome","password").execute();
 
                 if (tokenResponse.isSuccessful()) {
