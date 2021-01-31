@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<ScrollView android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -101,7 +105,6 @@
                         android:background="@drawable/background_form"
                         android:clickable="true"
                         android:drawablePadding="5dp"
-                        android:focusable="false"
                         android:importantForAutofill="no"
                         android:inputType="text"
                         android:minHeight="40dp"
@@ -416,5 +419,5 @@
             android:textSize="@dimen/ts_big"
             android:textStyle="bold" />
     </com.balysv.materialripple.MaterialRippleLayout>
-
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>

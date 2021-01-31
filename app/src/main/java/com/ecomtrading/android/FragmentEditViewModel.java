@@ -48,4 +48,10 @@ public class FragmentEditViewModel extends ViewModel {
     public void deleteCommunity(int id){
 
     }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        
+    }
 }

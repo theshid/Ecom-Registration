@@ -125,21 +125,21 @@ public class EditFragment extends DialogFragment implements Validator.Validation
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            localID = getArguments().getInt(ARG_PARAM1);
+            Log.d("Fragment",String.valueOf(localID));
+        }
         setStyle(DialogFragment.STYLE_NORMAL,R.style.yourStyle);
         apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
         database = MyDatabase.getInstance(getActivity());
         AppExecutor.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
-                information = database.dao().getCommunity(1);
+                information = database.dao().getCommunity(localID);
             }
         });
-        editViewModel = new ViewModelProvider(this, new FragmentEditViewModelFactory(
-                apiService, database)).get(FragmentEditViewModel.class);
-        if (getArguments() != null) {
-            localID = getArguments().getInt(ARG_PARAM1);
-            Log.d("Fragment",String.valueOf(localID));
-        }
+
+
     }
 
     @Override
@@ -181,18 +181,20 @@ public class EditFragment extends DialogFragment implements Validator.Validation
         textView_photo = view.findViewById(R.id.fragment_text_photo);
         imgLoadedCheckBox = view.findViewById(R.id.fragment_check);
 
-        /*community_name.setText(information.getCommunity_name());
+        community_name.setText(information.getCommunity_name());
         imageString = information.getImage();
         if (!imageString.isEmpty()) {
             imgLoadedCheckBox.setChecked(true);
             imgLoadedCheckBox.setText("Image Loaded");
         }
+        accessibility.setText(String.valueOf(information.getAccessibility()));
+        dateLicense.setText(String.valueOf(information.getDate_licence()));
         circleImageView.setImageBitmap(ConversionUtils.base64ToBitmap(information.getImage()));
-        geoDistrict.setText(information.getGeographical_district());
+        geoDistrict.setText(String.valueOf(information.getGeographical_district()));
         connectedToEcg.setText(information.getConnected_to_ecg());
-        distance.setText(information.getDistance());
+        distance.setText(String.valueOf(information.getDistance()));
         latitude.setText(String.valueOf(information.getLatitude()));
-        longitude.setText(String.valueOf(information.getLongitude()));*/
+        longitude.setText(String.valueOf(information.getLongitude()));
     }
 
     private void setBtnClickListeners() {
