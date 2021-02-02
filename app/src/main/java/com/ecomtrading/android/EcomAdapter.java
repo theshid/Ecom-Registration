@@ -106,7 +106,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
 
     }
 
-    public void updateList(ArrayList<CommunityInformation> newList) {
+    public void updateList(List<CommunityInformation> newList) {
         this.informationList = newList;
         notifyDataSetChanged();
 

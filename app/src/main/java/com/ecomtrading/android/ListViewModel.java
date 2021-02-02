@@ -64,29 +64,4 @@ public class ListViewModel extends ViewModel {
 
     }
 
-    public void getToken(){
-        Call<AccessToken> call = apiService.getToken("Bearer","murali","welcome","password");
-
-        call.enqueue(new Callback<AccessToken>() {
-            @Override
-            public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
-                if (response.body() != null) {
-                    session.saveToken(response.body().token);
-                    session.saveExpiryTime(response.body().expires);
-                    Log.d("ViewModel","Token retrieved");
-                }else{
-                    Log.d("ViewModel","request successful but body null");
-                }
-
-
-            }
-
-            @Override
-            public void onFailure(Call<AccessToken> call, Throwable t) {
-                Log.d("ViewModel","Token not retrieved");
-            }
-        });
-
-    }
-
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.ecomtrading.android.api.ApiClient;
 import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.utils.Session;
 
@@ -29,69 +30,96 @@ public class TokenInterceptor implements Interceptor {
     Context context;
 
 
-    public TokenInterceptor(){
+    public TokenInterceptor() {
         context = EcomApplication.getContext();
         mPrefs = new Session(context);
+
 
     }
 
     @NotNull
     @Override
     public Response intercept(Chain chain) throws IOException {
+        Request newRequest;
 
-        Request newRequest=chain.request().newBuilder()
-                .header("Authorization", "Bearer "+mPrefs.getUserToken())
-                .build();
+        if (mPrefs.getUserToken() != null ) {
 
-        //get expire time from shared preferences
-        long expireTime=1799;
-        Calendar c = Calendar.getInstance();
-        Date nowDate=c.getTime();
-        c.setTimeInMillis(expireTime);
-        Date expireDate=c.getTime();
+                newRequest = chain.request().newBuilder()
+                        .header("Authorization", "Bearer " + mPrefs.getUserToken())
+                        .build();
+            return  chain.proceed(newRequest);
 
-        int result=nowDate.compareTo(expireDate);
-        // when comparing dates -1 means date passed so we need to refresh token
-        if(result==-1) {
-            //refresh token here , and get new access token
-            AccessToken tokenResponse = refreshToken();
-
-            // Save refreshed token's expire time :
-            int expiresIn=Integer.parseInt(tokenResponse.expires);
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND,expiresIn);
-            mPrefs.saveExpiryTime(String.valueOf(calendar.getTimeInMillis()));
-
-            String newaccessToken="Bearer "+ tokenResponse.token;
-            newRequest=chain.request().newBuilder()
-                    .header("Authorization", newaccessToken)
-                    .build();
+        } else{
+            return null;
         }
-        return chain.proceed(newRequest);
+
+    }
+
+    private int checkIfTokenExpire(String tokenExpiryTime) {
+        //get expire time from shared preferences
+        long expireTime = Long.parseLong(tokenExpiryTime);
+        Calendar c = Calendar.getInstance();
+        Date nowDate = c.getTime();
+        c.setTimeInMillis(expireTime);
+        Date expireDate = c.getTime();
+        Log.d("Interceptor", "value of expiry time:" + expireDate);
+        int result = nowDate.compareTo(expireDate);
+        return result;
+    }
+
+    private Request builtNewRequest(Chain chain) {
+        //refresh token here , and get new access token
+        AccessToken tokenResponse = refreshToken();
+
+        // Save refreshed token's expire time :
+        int expiresIn = Integer.parseInt(tokenResponse.expires);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, expiresIn);
+        mPrefs.saveExpiryTime(String.valueOf(calendar.getTimeInMillis()));
+        Log.d("Interceptor", "value of expiry time converted in calendar:" + calendar.getTimeInMillis());
+
+        String newaccessToken = "Bearer " + tokenResponse.token;
+        return chain.request().newBuilder()
+                .header("Authorization", newaccessToken)
+                .build();
     }
 
     private AccessToken refreshToken() {
+        apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
+        Call<AccessToken> call = apiService.getToken("Bearer", "murali",
+                "welcome", "password");
 
-        Call<AccessToken> call = apiService.getToken("Bearer","murali",
-                "welcome","password");
-
+        /*try {
+            retrofit2.Response<AccessToken> response = call.execute();
+             accessToken = response.body();
+           // Log.d("Interceptor", "value of response" + accessToken.getToken());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
         call.enqueue(new Callback<AccessToken>() {
             @Override
             public void onResponse(Call<AccessToken> call, retrofit2.Response<AccessToken> response) {
 
                 if (response.body() != null) {
-                    Log.d("Interceptor","value of response"+ response.body().token);
-                    mPrefs.saveToken(response.body().token);
-                    mPrefs.saveExpiryTime(response.body().expires);
+
+                    // mPrefs.saveExpiryTime(response.body().expires);
                     accessToken = response.body();
+                    Log.d("Interceptor", "value of response" + accessToken.getToken());
+
+                    mPrefs.saveToken(accessToken.getToken());
+                    int expiresIn = Integer.parseInt(accessToken.getExpires());
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.SECOND, expiresIn);
+                    mPrefs.saveExpiryTime(String.valueOf(calendar.getTimeInMillis()));
+                    Log.d("Interceptor", "value of expiry time converted in calendar:" + calendar.getTimeInMillis());
                 }
-                Log.d("Interceptor","value of response is null");
+                Log.d("Interceptor", "value of response is null");
 
             }
 
             @Override
             public void onFailure(@NotNull Call<AccessToken> call, Throwable t) {
-                Log.d("Interceptor","value of response"+"failed" +t.getMessage());
+                Log.d("Interceptor", "value of response" + "failederror" + t.getMessage());
             }
         });
         return accessToken;

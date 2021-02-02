@@ -79,7 +79,7 @@ public class ListActivity extends AppCompatActivity {
 
     private void checkIfTokenAvailable() {
         if (session.getUserToken() == null) {
-            listViewModel.getToken();
+           // listViewModel.getToken();
         }
 
     }
@@ -103,7 +103,7 @@ public class ListActivity extends AppCompatActivity {
     }
 
     public void refreshList() {
-        adapter.updateList((ArrayList<CommunityInformation>) listViewModel.getData().getValue());
+        adapter.updateList(listViewModel.getData().getValue());
         // hideEmptyCommunityList();
     }
 }

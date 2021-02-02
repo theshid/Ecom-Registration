@@ -1,6 +1,7 @@
 package com.ecomtrading.android;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.ecomtrading.android.api.ApiClient;
 import com.ecomtrading.android.api.ApiService;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Calendar;
 
 import javax.inject.Inject;
 
@@ -18,80 +20,65 @@ import okhttp3.Authenticator;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 public class TokenAuthenticator implements Authenticator {
+    private static final String AUTHORIZATION = "Authorization";
     Context context;
     Session session;
     ApiService apiService;
     private static final String HEADER_AUTHORIZATION = "Authorization";
     private static final int REFRESH_TOKEN_FAIL = 401;
+    AccessToken accessToken;
 
     public TokenAuthenticator() {
-         context = EcomApplication.getContext();
-         session = new Session(context);
-         apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
+
+
     }
 
 
     @Nullable
     @Override
     public Request authenticate(@Nullable Route route, @NotNull Response response) throws IOException {
-        session = new Session(context);
-        // We need to have a token in order to refresh it.
-        String token = session.getUserToken();
-        if (token == null)
-            return null;
+       AccessToken newToken = refreshToken();
+       return  response.request().newBuilder()
+               .header(AUTHORIZATION, "Bearer " +session.getUserToken())
+               .build();
 
-        synchronized (this) {
-            String newToken = session.getUserToken();
-            if (newToken == null)
-                return null;
-
-            // Check if the request made was previously made as an authenticated request.
-            if (response.request().header(HEADER_AUTHORIZATION) != null) {
-
-                // If the token has changed since the request was made, use the new token.
-                if (!newToken.equals(token)) {
-                    return response.request()
-                            .newBuilder()
-                            .removeHeader(HEADER_AUTHORIZATION)
-                            .addHeader(HEADER_AUTHORIZATION, "Bearer " + newToken)
-                            .build();
-                }
-
-                JsonObject refreshObject = new JsonObject();
-                refreshObject.addProperty("refreshToken", session.getUserToken());
-
-                retrofit2.Response<AccessToken> tokenResponse =  apiService.getToken("Bearer","murali",
-                        "welcome","password").execute();
-
-                if (tokenResponse.isSuccessful()) {
-
-                    AccessToken userToken = tokenResponse.body();
-                    if (userToken == null)
-                        return null;
-
-                    session.saveToken(userToken.getToken());
-                    //preferencesHelper.saveRefreshToken(userToken.getRefreshToken());
-
-
-                    // Retry the request with the new token.
-                    return response.request()
-                            .newBuilder()
-                            .removeHeader(HEADER_AUTHORIZATION)
-                            .addHeader(HEADER_AUTHORIZATION, "Bearer " + userToken.getToken())
-                            .build();
-                } else {
-                    if (tokenResponse.code() == REFRESH_TOKEN_FAIL) {
-                        logoutUser();
-                    }
-                }
-            }
-        }
-        return null;
     }
 
-    private void logoutUser() {
+    private AccessToken refreshToken() {
+        context = EcomApplication.getContext();
+        session = new Session(context);
+        apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
+        Call<AccessToken> call = apiService.getToken("Bearer", "murali",
+                "welcome", "password");
+
+        call.enqueue(new Callback<AccessToken>() {
+            @Override
+            public void onResponse(Call<AccessToken> call, retrofit2.Response<AccessToken> response) {
+
+                if (response.body() != null) {
+
+                    // mPrefs.saveExpiryTime(response.body().expires);
+                    accessToken = response.body();
+                    Log.d("Auth", "value of response" + accessToken.getToken());
+
+                    session.saveToken(accessToken.getToken());
+                    session.saveExpiryTime(accessToken.getExpires());
+                    Log.d("Auth", "value of expiry time converted in calendar:" + accessToken.getExpires());
+                }
+
+
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<AccessToken> call, Throwable t) {
+                Log.d("Auth", "value of response" + "failederror" + t.getMessage());
+            }
+        });
+        return accessToken;
     }
 
 

@@ -27,8 +27,8 @@ public class ApiClient {
     private static void provideOkHttpClient() {
         if (okHttpClient == null) {
             okHttpClient = new OkHttpClient.Builder()
-                    /*.authenticator(new TokenAuthenticator())*/
-                    .addInterceptor(new TokenInterceptor())
+                    .authenticator(new TokenAuthenticator())
+                    /*.addInterceptor(new TokenInterceptor())*/
                     .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .connectTimeout(120, TimeUnit.SECONDS)
                     .readTimeout(120, TimeUnit.SECONDS)
@@ -44,9 +44,9 @@ public class ApiClient {
         }
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
-                    .client(okHttpClient)
                     .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create())
+                    .client(okHttpClient)
                     .build();
         }
         return retrofit;

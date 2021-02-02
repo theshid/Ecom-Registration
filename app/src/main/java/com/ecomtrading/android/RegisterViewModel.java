@@ -46,33 +46,48 @@ public class RegisterViewModel extends ViewModel {
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.code() == 200){
+                    information.setSent_server(true);
+                    executor.diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            database.dao().insertCommunityInfo(information);
+                            Log.d("Main", "executor");
+
+                        }
+                    });
+                }else{
+                    information.setSent_server(false);
+                    executor.diskIO().execute(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            database.dao().insertCommunityInfo(information);
+                            Log.d("Main", "executor");
+
+                        }
+                    });
+                }
                 Log.d("Main", "Success");
 
-                executor.diskIO().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        information.setSent_server(true);
-                        database.dao().insertCommunityInfo(information);
-                        Log.d("Main", "executor");
-
-                    }
-                });
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.d("Main", "failed to post");
-
                 executor.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        information.setSent_server(false);
+
                         database.dao().insertCommunityInfo(information);
                         Log.d("Main", "executor");
 
                     }
                 });
+
             }
         });
+
     }
 }
