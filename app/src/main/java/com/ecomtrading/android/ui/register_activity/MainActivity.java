@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     AppCompatEditText dateLicense;
     AppCompatButton btn_save, btn_location;
     String imgInString = "";
-    CircleImageView circleImageView;
+    AppCompatImageView circleImageView;
     Double lat, lgt;
     @NotEmpty
     AppCompatEditText community_name, geoDistrict, accessibility, distance, connectedToEcg, latitude, longitude;

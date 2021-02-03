@@ -14,6 +14,7 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -83,7 +84,7 @@ public class EditFragment extends DialogFragment implements Validator.Validation
     private FragmentEditBinding fragmentEditBinding;
     @NotEmpty
     AppCompatEditText community_name, geoDistrict, accessibility, distance, connectedToEcg, latitude, longitude;
-    CircleImageView circleImageView;
+    AppCompatImageView circleImageView;
     private FusedLocationProviderClient fusedLocationClient;
     private static final int REQUEST_CAMERA = 87;
     private static final int REQUEST_GALLERY = 434;

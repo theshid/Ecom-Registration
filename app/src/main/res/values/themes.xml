@@ -19,8 +19,8 @@
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowAnimationStyle">@null</item>
         <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:windowMinWidthMajor">75%</item>
-        <item name="android:windowMinWidthMinor">75%</item>
+        <item name="android:windowMinWidthMajor">85%</item>
+        <item name="android:windowMinWidthMinor">85%</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowSoftInputMode">adjustPan</item>
     </style>

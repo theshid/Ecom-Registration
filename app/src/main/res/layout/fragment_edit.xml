@@ -31,7 +31,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_height="wrap_content">
-                <de.hdodenhof.circleimageview.CircleImageView
+                <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/community_photo"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
@@ -39,7 +39,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    android:src="@drawable/avatar_placeholder"
+                    android:src="@drawable/holder"
                     android:scaleType="centerCrop"/>
 
                 <TextView
@@ -68,6 +68,7 @@
                 android:id="@+id/fragment_check"
                 android:clickable="false"
                 android:text="Image not loaded"
+                android:textColor="@color/black"
                 android:gravity="center"
                 android:layout_gravity="center"/>
 

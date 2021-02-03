@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentManager;
@@ -200,7 +201,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         TextView name, district, accessibility, distance, connected, date_license, latitude, longitude,
         textView_status;
         CardView cardView;
-        CircleImageView image;
+        AppCompatImageView image;
         ImageView img_status;
         Button btn;
 

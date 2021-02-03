@@ -28,7 +28,7 @@
         android:layout_marginBottom="@dimen/spacing_large"
         android:background="@drawable/background_round_white">
 
-        <de.hdodenhof.circleimageview.CircleImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/photo"
             android:layout_width="100dp"
             android:layout_height="100dp"
@@ -36,7 +36,7 @@
             android:layout_centerHorizontal="true"
             android:contentDescription="photo"
             android:scaleType="centerCrop"
-            android:src="@drawable/avatar_placeholder"
+            android:src="@drawable/holder"
             android:layout_marginRight="@dimen/spacing_small" />
 
         <TableLayout
@@ -250,7 +250,7 @@
             android:id="@+id/image_status"
             android:layout_marginTop="10dp"
             android:layout_below="@+id/table_layout"
-            app:tint="@color/md_red_900" />
+             />
 
         <TextView
             android:layout_width="wrap_content"
