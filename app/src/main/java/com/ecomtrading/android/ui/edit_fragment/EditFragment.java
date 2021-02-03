@@ -502,7 +502,9 @@ public class EditFragment extends DialogFragment implements Validator.Validation
                     @Override
                     public void run() {
 
-                        database.dao().insertCommunityInfo(communityInformation);
+                        database.dao().updateInformation(name,id,geographical_district,accessibility,
+                                distance,connected_to_ecg,date_licence,latitude,longitude,image,updateBy,
+                                updateDate,communityInformation.getSent_server());
                         Log.d("Fragment", "executor");
 
                     }
@@ -516,7 +518,9 @@ public class EditFragment extends DialogFragment implements Validator.Validation
                     @Override
                     public void run() {
                         communityInformation.setSent_server(false);
-                        database.dao().insertCommunityInfo(communityInformation);
+                        database.dao().updateInformation(name,id,geographical_district,accessibility,
+                                distance,connected_to_ecg,date_licence,latitude,longitude,image,updateBy,
+                                updateDate,communityInformation.getSent_server());
                         Log.d("Fragment", "executor");
 
                     }

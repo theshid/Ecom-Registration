@@ -1,5 +1,6 @@
 package com.ecomtrading.android.ui.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,12 +13,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ecomtrading.android.R;
+import com.ecomtrading.android.api.ApiClient;
+import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
 import com.ecomtrading.android.ui.edit_fragment.EditFragment;
@@ -29,6 +33,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     Context context;
@@ -41,6 +49,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     MyDatabase database;
     AppExecutor appExecutor;
     String date_creation, user_name;
+    ApiService apiService;
 
 
     public EcomAdapter(ListActivity listActivity, List<CommunityInformation> informationList,
@@ -51,6 +60,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         this.database = MyDatabase.getInstance(context);
         this.fm = fm;
         this.context = context;
+        this.apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
 
     }
 
@@ -62,6 +72,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CommunityInformation communityInformation = informationList.get(position);
@@ -83,7 +94,8 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         } else {
             holder.img_status.setImageResource(R.drawable.ic_check_circle);
             holder.textView_status.setText("Item sent");
-            holder.textView_status.setText(View.GONE);
+            holder.btn.setVisibility(View.GONE);
+           // holder.img_status.setBackgroundTintList(AppCompatResources.getColorStateList(context,R.color.md_green_700));
         }
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,6 +104,73 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
                 positionInArray = holder.getAdapterPosition();
                 showPopupMenu(v,communityInformation.getCommunity_id(),communityInformation.getCreatedDate() ,
                         communityInformation.getCreatedBy());
+            }
+        });
+
+        holder.btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppExecutor executor = AppExecutor.getInstance();
+                Call<ResponseBody> call = apiService.sendInformation(communityInformation.getCommunity_name(),
+                        communityInformation.getGeographical_district(),communityInformation.getAccessibility(),
+                        communityInformation.getDistance(),communityInformation.getConnected_to_ecg(),
+                        communityInformation.getDate_licence(),communityInformation.getLatitude(),
+                        communityInformation.getLongitude(),communityInformation.getImage(),
+                        communityInformation.getCreatedBy(),communityInformation.getCreatedDate(),
+                        communityInformation.getUpdateBy(),communityInformation.getUpdateDate());
+
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        communityInformation.setSent_server(response.code() == 200);
+                        executor.diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                database.dao().updateInformation(communityInformation.getCommunity_name(),
+                                        communityInformation.getCommunity_id(),
+                                        communityInformation.getGeographical_district(),
+                                        communityInformation.getAccessibility(),
+                                        communityInformation.getDistance(),
+                                        communityInformation.getConnected_to_ecg(),
+                                        communityInformation.getDate_licence(),
+                                        communityInformation.getLatitude(),
+                                        communityInformation.getLongitude(),
+                                        communityInformation.getImage(),
+                                        communityInformation.getUpdateBy(),
+                                        communityInformation.getUpdateDate(),
+                                        communityInformation.getSent_server());
+                                Log.d("Adapter", "executor");
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        executor.diskIO().execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                communityInformation.setSent_server(false);
+                                database.dao().updateInformation(communityInformation.getCommunity_name(),
+                                        communityInformation.getCommunity_id(),
+                                        communityInformation.getGeographical_district(),
+                                        communityInformation.getAccessibility(),
+                                        communityInformation.getDistance(),
+                                        communityInformation.getConnected_to_ecg(),
+                                        communityInformation.getDate_licence(),
+                                        communityInformation.getLatitude(),
+                                        communityInformation.getLongitude(),
+                                        communityInformation.getImage(),
+                                        communityInformation.getUpdateBy(),
+                                        communityInformation.getUpdateDate(),
+                                        communityInformation.getSent_server());
+                                Log.d("Adapter", "executor");
+
+                            }
+                        });
+                    }
+                });
             }
         });
 
