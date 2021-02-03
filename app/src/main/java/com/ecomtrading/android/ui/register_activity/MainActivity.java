@@ -1,33 +1,23 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.ui.register_activity;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.PopupMenu;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.Settings;
-import android.util.Base64;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,12 +27,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.ecomtrading.android.R;
 import com.ecomtrading.android.api.ApiClient;
 import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
+import com.ecomtrading.android.ui.list_activity.ListActivity;
 import com.ecomtrading.android.utils.PermissionUtils;
-import com.ecomtrading.android.utils.Session;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,7 +42,6 @@ import com.mobsandgeeks.saripaar.Validator;
 import com.mobsandgeeks.saripaar.annotation.Checked;
 import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -60,14 +50,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import javax.inject.Inject;
-
-import dagger.hilt.android.AndroidEntryPoint;
 import de.hdodenhof.circleimageview.CircleImageView;
-import io.nlopez.smartlocation.OnLocationUpdatedListener;
-import io.nlopez.smartlocation.SmartLocation;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.RuntimePermissions;
 
 import static com.ecomtrading.android.utils.ConversionUtils.bitmapToBase64;
 import static com.ecomtrading.android.utils.PermissionUtils.checkCameraPermissions;
@@ -384,7 +367,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
     }
 
     private void goBackToListActivity(){
-        Intent intent = new Intent(this,ListActivity.class);
+        Intent intent = new Intent(this, ListActivity.class);
         startActivity(intent);
     }
 

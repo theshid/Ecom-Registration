@@ -1,4 +1,4 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.ui.list_activity;
 
 import android.app.Application;
 import android.content.Context;

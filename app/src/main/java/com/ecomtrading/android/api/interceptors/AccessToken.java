@@ -1,4 +1,4 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.api.interceptors;
 
 import com.google.gson.annotations.SerializedName;
 

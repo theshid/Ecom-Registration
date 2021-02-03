@@ -1,18 +1,13 @@
-package com.ecomtrading.android;
-
-import android.content.Context;
+package com.ecomtrading.android.ui.list_activity;
 
 import androidx.annotation.NonNull;
-import androidx.hilt.Assisted;
-import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.db.MyDatabase;
+import com.ecomtrading.android.ui.list_activity.ListViewModel;
 import com.ecomtrading.android.utils.Session;
-
-import javax.inject.Inject;
 
 public class ListViewModelFactory implements ViewModelProvider.Factory {
     MyDatabase database;

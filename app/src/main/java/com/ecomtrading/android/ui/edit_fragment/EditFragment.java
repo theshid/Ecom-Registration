@@ -1,4 +1,4 @@
-package com.ecomtrading.android.ui;
+package com.ecomtrading.android.ui.edit_fragment;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -17,8 +17,6 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.SavedStateHandle;
-import androidx.lifecycle.ViewModelProvider;
 
 import android.provider.MediaStore;
 import android.util.Log;
@@ -32,9 +30,6 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ecomtrading.android.FragmentEditViewModel;
-import com.ecomtrading.android.FragmentEditViewModelFactory;
-import com.ecomtrading.android.MainActivity;
 import com.ecomtrading.android.R;
 import com.ecomtrading.android.api.ApiClient;
 import com.ecomtrading.android.api.ApiService;
@@ -43,7 +38,7 @@ import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
 import com.ecomtrading.android.utils.AppExecutor;
 import com.ecomtrading.android.utils.ConversionUtils;
-import com.ecomtrading.android.utils.PermissionUtils;
+import com.ecomtrading.android.utils.GsonParser;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -60,16 +55,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import javax.inject.Inject;
-
-import dagger.hilt.android.AndroidEntryPoint;
 import de.hdodenhof.circleimageview.CircleImageView;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 import static com.ecomtrading.android.utils.ConversionUtils.bitmapToBase64;
-import static com.ecomtrading.android.utils.PermissionUtils.isLocationEnabled;
-import static com.ecomtrading.android.utils.PermissionUtils.requestAccessFineLocationPermission;
-import static com.ecomtrading.android.utils.PermissionUtils.showGPSNotEnabledDialog;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -80,7 +73,10 @@ import static com.ecomtrading.android.utils.PermissionUtils.showGPSNotEnabledDia
 public class EditFragment extends DialogFragment implements Validator.ValidationListener {
 
     private static final String ARG_PARAM1 = "param1";
+    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM3 = "param3";
     private int localID ;
+    private String communityInfoInString;
     private String imageString = "";
     private DatePickerDialog.OnDateSetListener date;
     private Calendar calendar;
@@ -104,6 +100,7 @@ public class EditFragment extends DialogFragment implements Validator.Validation
     private FragmentEditViewModel editViewModel;
     CommunityInformation information;
     Validator validator;
+    CommunityInformation communityInformation;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 999;
 
 
@@ -113,9 +110,11 @@ public class EditFragment extends DialogFragment implements Validator.Validation
 
 
     // TODO: Rename and change types and number of parameters
-    public static EditFragment newInstance(int param1) {
+    public static EditFragment newInstance(int param1,CommunityInformation information) {
         EditFragment fragment = new EditFragment();
         Bundle args = new Bundle();
+        String communityInfo = GsonParser.getGsonParser().toJson(information);
+        args.putString(ARG_PARAM2,communityInfo);
         args.putInt(ARG_PARAM1, param1);
         fragment.setArguments(args);
 
@@ -127,6 +126,9 @@ public class EditFragment extends DialogFragment implements Validator.Validation
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             localID = getArguments().getInt(ARG_PARAM1);
+            communityInfoInString = getArguments().getString(ARG_PARAM2);
+            communityInformation = GsonParser.getGsonParser().fromJson(communityInfoInString,CommunityInformation.class);
+
             Log.d("Fragment",String.valueOf(localID));
         }
         setStyle(DialogFragment.STYLE_NORMAL,R.style.yourStyle);
@@ -466,12 +468,81 @@ public class EditFragment extends DialogFragment implements Validator.Validation
 
     @Override
     public void onValidationSucceeded() {
+        String communityName = community_name.getText().toString();
+        int geo_district = Integer.parseInt(geoDistrict.getText().toString());
+        int accessibility_str = Integer.parseInt(accessibility.getText().toString());
+        int distance_ecom = Integer.parseInt(distance.getText().toString());
+        String connect_ecg = connectedToEcg.getText().toString();
+        String date_license = dateLicense.getText().toString();
+        double lat = Double.parseDouble(latitude.getText().toString());
+        double longitu = Double.parseDouble(longitude.getText().toString());
+        String updateBy = "murali";
+        String updateDate = getCurrentTimeStamp();
 
+        updateCommunity(localID,communityName,geo_district,accessibility_str,distance_ecom,connect_ecg,
+                date_license,lat,longitu,imageString,updateBy,updateDate);
+
+        dismissFragment();
+    }
+
+    private void updateCommunity(int id,String name,  int geographical_district,
+                                 int accessibility, int distance, String connected_to_ecg,
+                                 String date_licence, Double latitude, Double longitude, String image,
+                                  String updateBy, String updateDate){
+        AppExecutor executor = AppExecutor.getInstance();
+        Call<ResponseBody> call = apiService.sendInformation(name,geographical_district,accessibility,
+                distance,connected_to_ecg,date_licence,latitude,longitude,image,communityInformation.getCreatedBy(),
+                communityInformation.getCreatedDate(),updateBy,updateDate);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                communityInformation.setSent_server(response.code() == 200);
+                executor.diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        database.dao().insertCommunityInfo(communityInformation);
+                        Log.d("Fragment", "executor");
+
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.d("Fragment", "failed to post");
+                executor.diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        communityInformation.setSent_server(false);
+                        database.dao().insertCommunityInfo(communityInformation);
+                        Log.d("Fragment", "executor");
+
+                    }
+                });
+            }
+        });
+
+    }
+
+    private void dismissFragment(){
+        dismiss();
     }
 
     @Override
     public void onValidationFailed(List<ValidationError> errors) {
+        for (ValidationError error : errors) {
+            View view = error.getView();
+            String message = error.getCollatedErrorMessage(getContext());
 
+            // Display error messages ;)
+            if (view instanceof AppCompatEditText) {
+                ((AppCompatEditText) view).setError(message);
+            } else {
+                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     private void showPopupMenu(View view) {

@@ -9,6 +9,8 @@ import com.ecomtrading.android.converters.TimestampConverter;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 
 @Entity(tableName = "community_information")
 public class CommunityInformation  {

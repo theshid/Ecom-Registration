@@ -1,17 +1,9 @@
 package com.ecomtrading.android.api;
 
-import android.content.Context;
-
-import com.ecomtrading.android.TokenAuthenticator;
-import com.ecomtrading.android.TokenInterceptor;
-import com.ecomtrading.android.utils.Session;
+import com.ecomtrading.android.api.interceptors.TokenAuthenticator;
 
 import java.util.concurrent.TimeUnit;
 
-import javax.inject.Singleton;
-
-import dagger.Provides;
-import dagger.hilt.android.qualifiers.ApplicationContext;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;

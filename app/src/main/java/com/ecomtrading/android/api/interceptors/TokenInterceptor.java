@@ -1,9 +1,9 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.api.interceptors;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
+import com.ecomtrading.android.EcomApplication;
 import com.ecomtrading.android.api.ApiClient;
 import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.utils.Session;
@@ -14,9 +14,6 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 
-import javax.inject.Inject;
-
-import kotlin.contracts.ConditionalEffect;
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;

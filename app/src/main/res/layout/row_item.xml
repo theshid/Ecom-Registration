@@ -33,6 +33,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginEnd="@dimen/spacing_small"
+            android:layout_centerHorizontal="true"
             android:contentDescription="photo"
             android:scaleType="centerCrop"
             android:src="@drawable/avatar_placeholder"
@@ -247,6 +248,27 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_error"
             android:id="@+id/image_status"
-            android:layout_below="@+id/table_layout"/>
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/table_layout"
+            app:tint="@color/md_red_900" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textview_status"
+            android:text="Item not sent"
+            android:layout_marginTop="10dp"
+            android:layout_below="@+id/table_layout"
+            android:layout_toEndOf="@+id/image_status"
+            android:layout_toRightOf="@+id/image_status" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_resend"
+            android:text="Resend"
+            android:layout_below="@+id/table_layout"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true" />
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

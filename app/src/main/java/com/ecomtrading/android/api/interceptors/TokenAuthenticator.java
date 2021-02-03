@@ -1,20 +1,17 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.api.interceptors;
 
 import android.content.Context;
 import android.util.Log;
 
+import com.ecomtrading.android.EcomApplication;
 import com.ecomtrading.android.api.ApiClient;
 import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.utils.Session;
-import com.google.gson.JsonObject;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.Calendar;
-
-import javax.inject.Inject;
 
 import okhttp3.Authenticator;
 import okhttp3.Request;

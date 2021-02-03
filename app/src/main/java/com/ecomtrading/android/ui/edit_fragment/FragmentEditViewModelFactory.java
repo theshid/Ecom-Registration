@@ -1,4 +1,4 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.ui.edit_fragment;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.SavedStateHandle;

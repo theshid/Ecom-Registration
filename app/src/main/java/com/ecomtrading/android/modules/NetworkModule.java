@@ -2,8 +2,8 @@ package com.ecomtrading.android.modules;
 
 import android.content.Context;
 
-import com.ecomtrading.android.TokenAuthenticator;
-import com.ecomtrading.android.TokenInterceptor;
+import com.ecomtrading.android.api.interceptors.TokenAuthenticator;
+import com.ecomtrading.android.api.interceptors.TokenInterceptor;
 import com.ecomtrading.android.api.ApiService;
 import com.ecomtrading.android.utils.Session;
 
@@ -14,12 +14,7 @@ import javax.inject.Singleton;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
-import dagger.hilt.android.components.ActivityComponent;
-import dagger.hilt.android.components.ApplicationComponent;
-import dagger.hilt.android.components.ViewModelComponent;
-import dagger.hilt.android.qualifiers.ActivityContext;
 import dagger.hilt.android.qualifiers.ApplicationContext;
-import dagger.hilt.android.scopes.ViewModelScoped;
 import dagger.hilt.components.SingletonComponent;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;

@@ -1,4 +1,4 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.ui.edit_fragment;
 
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.hilt.Assisted;
@@ -45,9 +45,6 @@ public class FragmentEditViewModel extends ViewModel {
 
     }
 
-    public void deleteCommunity(int id){
-
-    }
 
     @Override
     protected void onCleared() {

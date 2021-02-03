@@ -1,23 +1,14 @@
 package com.ecomtrading.android.api;
 
-import android.widget.SimpleAdapter;
-
-import com.ecomtrading.android.AccessToken;
+import com.ecomtrading.android.api.interceptors.AccessToken;
 import com.ecomtrading.android.entity.CommunityInformation;
 
-import java.text.SimpleDateFormat;
-import java.util.List;
-
-import dagger.hilt.android.scopes.ViewModelScoped;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 

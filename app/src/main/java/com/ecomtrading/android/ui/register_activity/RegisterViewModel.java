@@ -1,4 +1,4 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.ui.register_activity;
 
 import android.content.Context;
 import android.util.Log;

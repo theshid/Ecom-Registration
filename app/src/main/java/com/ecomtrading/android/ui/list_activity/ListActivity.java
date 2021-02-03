@@ -1,8 +1,7 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.ui.list_activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -13,9 +12,11 @@ import android.util.Log;
 import android.view.View;
 
 
+import com.ecomtrading.android.ui.adapter.EcomAdapter;
+import com.ecomtrading.android.ui.register_activity.MainActivity;
+import com.ecomtrading.android.R;
 import com.ecomtrading.android.api.ApiClient;
 import com.ecomtrading.android.api.ApiService;
-import com.ecomtrading.android.databinding.ActivityListBinding;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
 import com.ecomtrading.android.utils.Session;
@@ -23,10 +24,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.inject.Inject;
-
-import dagger.hilt.android.AndroidEntryPoint;
 
 
 public class ListActivity extends AppCompatActivity {

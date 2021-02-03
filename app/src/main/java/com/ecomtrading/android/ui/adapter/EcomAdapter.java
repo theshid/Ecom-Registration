@@ -1,9 +1,6 @@
-package com.ecomtrading.android;
+package com.ecomtrading.android.ui.adapter;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -15,17 +12,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentManager;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.afollestad.materialdialogs.MaterialDialog;
+import com.ecomtrading.android.R;
 import com.ecomtrading.android.db.MyDatabase;
 import com.ecomtrading.android.entity.CommunityInformation;
-import com.ecomtrading.android.ui.EditFragment;
+import com.ecomtrading.android.ui.edit_fragment.EditFragment;
+import com.ecomtrading.android.ui.list_activity.ListActivity;
 import com.ecomtrading.android.utils.AppExecutor;
 import com.ecomtrading.android.utils.ConversionUtils;
 
@@ -41,8 +37,10 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     FragmentManager fm;
     private int id ;
     private int position;
+    private int positionInArray;
     MyDatabase database;
     AppExecutor appExecutor;
+    String date_creation, user_name;
 
 
     public EcomAdapter(ListActivity listActivity, List<CommunityInformation> informationList,
@@ -80,14 +78,20 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         holder.image.setImageBitmap(ConversionUtils.base64ToBitmap(communityInformation.getImage()));
         if (!communityInformation.getSent_server()) {
             holder.img_status.setImageResource(R.drawable.ic_error);
+            holder.textView_status.setText("Item not sent");
+            holder.btn.setVisibility(View.VISIBLE);
         } else {
             holder.img_status.setImageResource(R.drawable.ic_check_circle);
+            holder.textView_status.setText("Item sent");
+            holder.textView_status.setText(View.GONE);
         }
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("Fragment","value of"+ position);
-                showPopupMenu(v,communityInformation.getCommunity_id(),holder.getAdapterPosition() );
+                positionInArray = holder.getAdapterPosition();
+                showPopupMenu(v,communityInformation.getCommunity_id(),communityInformation.getCreatedDate() ,
+                        communityInformation.getCreatedBy());
             }
         });
 
@@ -114,10 +118,12 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, district, accessibility, distance, connected, date_license, latitude, longitude;
+        TextView name, district, accessibility, distance, connected, date_license, latitude, longitude,
+        textView_status;
         CardView cardView;
         CircleImageView image;
         ImageView img_status;
+        Button btn;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -133,15 +139,19 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
             image = itemView.findViewById(R.id.photo);
             cardView = itemView.findViewById(R.id.ripple);
             img_status = itemView.findViewById(R.id.image_status);
+            textView_status = itemView.findViewById(R.id.textview_status);
+            btn = itemView.findViewById(R.id.btn_resend);
 
 
 
         }
     }
 
-    private void showPopupMenu(View view, int localid, int position) {
+    private void showPopupMenu(View view, int localid, String createdDate,String name_user) {
         // inflate menu
         id = localid;
+        user_name = name_user;
+        date_creation = createdDate;
         PopupMenu popup = new PopupMenu(view.getContext(), view);
         MenuInflater inflater = popup.getMenuInflater();
         inflater.inflate(R.menu.menu_list, popup.getMenu());
@@ -156,10 +166,11 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
 
         @Override
         public boolean onMenuItemClick(MenuItem item) {
+            CommunityInformation communityInformation = informationList.get(positionInArray);
             switch (item.getItemId()) {
                 case R.id.action_edit:
                     Log.d("Fragment",String.valueOf(id));
-                    EditFragment.newInstance(id).show(fm, "Dialog Fragment");
+                    EditFragment.newInstance(id,communityInformation).show(fm, "Dialog Fragment");
                     return true;
                 case R.id.action_delete:
                     appExecutor = AppExecutor.getInstance();
@@ -167,7 +178,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
                         @Override
                         public void run() {
                             Log.d("Fragment","value of"+ position);
-                            CommunityInformation communityInformation = informationList.get(position);
+
                             database.dao().deleteCommunityInfo(communityInformation);
                         }
                     });
