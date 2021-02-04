@@ -59,6 +59,7 @@ dependencies {
     def fragment_version = "1.2.5"
 
     implementation "androidx.fragment:fragment:$fragment_version"
+    implementation "net.steamcrafted:load-toast:1.0.12"
 
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"

@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements Validator.Validat
         apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
         database = MyDatabase.getInstance(this);
         viewModel = new ViewModelProvider(this, new RegisterViewModelFactory(
-                apiService,database)).get(RegisterViewModel.class);
+                apiService,database,this)).get(RegisterViewModel.class);
         hideSoftKeyboard();
         checkCameraPermissions(this);
         validator = new Validator(this);

@@ -22,6 +22,8 @@ import com.ecomtrading.android.entity.CommunityInformation;
 import com.ecomtrading.android.utils.Session;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import net.steamcrafted.loadtoast.LoadToast;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +41,7 @@ public class ListActivity extends AppCompatActivity {
     FloatingActionButton fab;
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +55,6 @@ public class ListActivity extends AppCompatActivity {
         setupRecyclerViewAndAdapter();
         setViewModel();
 
-        checkIfTokenAvailable();
 
         setClickListeners();
         //refreshList();
@@ -74,12 +76,6 @@ public class ListActivity extends AppCompatActivity {
         });
     }
 
-    private void checkIfTokenAvailable() {
-        if (session.getUserToken() == null) {
-           // listViewModel.getToken();
-        }
-
-    }
 
     private void setClickListeners() {
         fab.setOnClickListener(new View.OnClickListener() {

@@ -19,6 +19,8 @@ import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -48,6 +50,8 @@ import com.mobsandgeeks.saripaar.Validator;
 import com.mobsandgeeks.saripaar.annotation.Checked;
 import com.mobsandgeeks.saripaar.annotation.NotEmpty;
 
+import net.steamcrafted.loadtoast.LoadToast;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -76,7 +80,7 @@ public class EditFragment extends DialogFragment implements Validator.Validation
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private static final String ARG_PARAM3 = "param3";
-    private int localID ;
+    private int localID;
     private String communityInfoInString;
     private String imageString = "";
     private DatePickerDialog.OnDateSetListener date;
@@ -102,6 +106,7 @@ public class EditFragment extends DialogFragment implements Validator.Validation
     CommunityInformation information;
     Validator validator;
     CommunityInformation communityInformation;
+    Boolean status_check = false;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 999;
 
 
@@ -111,11 +116,11 @@ public class EditFragment extends DialogFragment implements Validator.Validation
 
 
     // TODO: Rename and change types and number of parameters
-    public static EditFragment newInstance(int param1,CommunityInformation information) {
+    public static EditFragment newInstance(int param1, CommunityInformation information) {
         EditFragment fragment = new EditFragment();
         Bundle args = new Bundle();
         String communityInfo = GsonParser.getGsonParser().toJson(information);
-        args.putString(ARG_PARAM2,communityInfo);
+        args.putString(ARG_PARAM2, communityInfo);
         args.putInt(ARG_PARAM1, param1);
         fragment.setArguments(args);
 
@@ -128,13 +133,14 @@ public class EditFragment extends DialogFragment implements Validator.Validation
         if (getArguments() != null) {
             localID = getArguments().getInt(ARG_PARAM1);
             communityInfoInString = getArguments().getString(ARG_PARAM2);
-            communityInformation = GsonParser.getGsonParser().fromJson(communityInfoInString,CommunityInformation.class);
+            communityInformation = GsonParser.getGsonParser().fromJson(communityInfoInString, CommunityInformation.class);
 
-            Log.d("Fragment",String.valueOf(localID));
+            Log.d("Fragment", String.valueOf(localID));
         }
-        setStyle(DialogFragment.STYLE_NORMAL,R.style.yourStyle);
+        setStyle(DialogFragment.STYLE_NORMAL, R.style.yourStyle);
         apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
         database = MyDatabase.getInstance(getActivity());
+        getUserLocation();
         AppExecutor.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
@@ -155,8 +161,7 @@ public class EditFragment extends DialogFragment implements Validator.Validation
         View view = fragmentEditBinding.getRoot();
         validator = new Validator(this);
         validator.setValidationListener(this);
-        Log.d("Fragment",String.valueOf(localID));
-
+        Log.d("Fragment", String.valueOf(localID));
 
 
         setUi(view);
@@ -480,32 +485,42 @@ public class EditFragment extends DialogFragment implements Validator.Validation
         String updateBy = "murali";
         String updateDate = getCurrentTimeStamp();
 
-        updateCommunity(localID,communityName,geo_district,accessibility_str,distance_ecom,connect_ecg,
-                date_license,lat,longitu,imageString,updateBy,updateDate);
 
-        dismissFragment();
+        updateCommunity(localID, communityName, geo_district, accessibility_str, distance_ecom, connect_ecg,
+                date_license, lat, longitu, imageString, updateBy, updateDate);
+
+
     }
 
-    private void updateCommunity(int id,String name,  int geographical_district,
+    private void updateCommunity(int id, String name, int geographical_district,
                                  int accessibility, int distance, String connected_to_ecg,
                                  String date_licence, Double latitude, Double longitude, String image,
-                                  String updateBy, String updateDate){
+                                 String updateBy, String updateDate) {
         AppExecutor executor = AppExecutor.getInstance();
-        Call<ResponseBody> call = apiService.sendInformation(name,geographical_district,accessibility,
-                distance,connected_to_ecg,date_licence,latitude,longitude,image,communityInformation.getCreatedBy(),
-                communityInformation.getCreatedDate(),updateBy,updateDate);
+        Call<ResponseBody> call = apiService.sendInformation(name, geographical_district, accessibility,
+                distance, connected_to_ecg, date_licence, latitude, longitude, image, communityInformation.getCreatedBy(),
+                communityInformation.getCreatedDate(), updateBy, updateDate);
 
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 communityInformation.setSent_server(response.code() == 200);
+                Log.d("Response Code",String.valueOf(response.code()));
+                if (response.code() == 200){
+                    status_check = true;
+                    displayToast(status_check);
+                } else {
+                    status_check = false;
+                    displayToast(status_check);
+                }
+
+
                 executor.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-
-                        database.dao().updateInformation(name,id,geographical_district,accessibility,
-                                distance,connected_to_ecg,date_licence,latitude,longitude,image,updateBy,
-                                updateDate,communityInformation.getSent_server());
+                        database.dao().updateInformation(name, id, geographical_district, accessibility,
+                                distance, connected_to_ecg, date_licence, latitude, longitude, image, updateBy,
+                                updateDate, communityInformation.getSent_server());
                         Log.d("Fragment", "executor");
 
                     }
@@ -515,13 +530,16 @@ public class EditFragment extends DialogFragment implements Validator.Validation
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.d("Fragment", "failed to post");
+
                 executor.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
+                        status_check = false;
+                        displayToast(status_check);
                         communityInformation.setSent_server(false);
-                        database.dao().updateInformation(name,id,geographical_district,accessibility,
-                                distance,connected_to_ecg,date_licence,latitude,longitude,image,updateBy,
-                                updateDate,communityInformation.getSent_server());
+                        database.dao().updateInformation(name, id, geographical_district, accessibility,
+                                distance, connected_to_ecg, date_licence, latitude, longitude, image, updateBy,
+                                updateDate, communityInformation.getSent_server());
                         Log.d("Fragment", "executor");
 
                     }
@@ -531,7 +549,29 @@ public class EditFragment extends DialogFragment implements Validator.Validation
 
     }
 
-    private void dismissFragment(){
+    private void displayToast(Boolean status) {
+        if (status) {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getContext(), "Data successfully sent to server!", Toast.LENGTH_LONG).show();
+                    dismissFragment();
+                }
+            });
+
+        } else {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getContext(), "Data not sent to server! Check Internet", Toast.LENGTH_LONG).show();
+                    dismissFragment();
+                }
+            });
+
+        }
+    }
+
+    private void dismissFragment() {
         dismiss();
     }
 

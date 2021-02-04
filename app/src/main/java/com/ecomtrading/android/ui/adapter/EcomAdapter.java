@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -29,6 +30,8 @@ import com.ecomtrading.android.ui.edit_fragment.EditFragment;
 import com.ecomtrading.android.ui.list_activity.ListActivity;
 import com.ecomtrading.android.utils.AppExecutor;
 import com.ecomtrading.android.utils.ConversionUtils;
+
+import net.steamcrafted.loadtoast.LoadToast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +56,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
     ApiService apiService;
 
 
+
     public EcomAdapter(ListActivity listActivity, List<CommunityInformation> informationList,
                        Context context, FragmentManager fm) {
 
@@ -62,6 +66,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
         this.fm = fm;
         this.context = context;
         this.apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
+
 
     }
 
@@ -264,6 +269,7 @@ public class EcomAdapter extends RecyclerView.Adapter<EcomAdapter.ViewHolder> {
                     });
 
                     listActivity.refreshList();
+                    Toast.makeText(context,"Data deleted!",Toast.LENGTH_LONG).show();
                     return true;
                 default:
             }
